@@ -9,15 +9,15 @@ The project also includes a scraper that downloads the latest exchange rate pdf 
 ## API Endpoints
 Here's a list of all the endpoints so far:
 
--	/interbank/get_latest_rate/: Returns the latest interbank exchange rate.
--	/interbank/get_rate_on/<str:date>/: Returns the interbank exchange rate for a specific date.
--	/interbank/get_all_rates/: Returns all interbank exchange rates.
--	/nec/get_necs/: Returns all National Employment Councils (NECs).
--	/nec/<int:pk>/get_latest_rate/: Returns the latest NEC exchange rate for a specific NEC.
--	/nec/<int:pk>/get_all_rates/: Returns all NEC exchange rates for a specific NEC.
-- /nec/<int:pk>/get_rate_on/<str:date>/: Returns the NEC rate for a given date
-- /nec/<int:pk>/get_all_grades/: Returns all the grades for a given NEC
-- /nec/<int:pk>/get_grade/<str:grade>/: Returns the grade name and USD Minimum for a specific NEC and grade name.
+-	`/interbank/get_latest_rate/`: Returns the latest interbank exchange rate.
+-	`/interbank/get_rate_on/<str:date>/`: Returns the interbank exchange rate for a specific date.
+-	`/interbank/get_all_rates/`: Returns all interbank exchange rates.
+-	`/nec/get_necs/`: Returns all National Employment Councils (NECs).
+-	`/nec/<int:pk>/get_latest_rate/`: Returns the latest NEC exchange rate for a specific NEC.
+-	`/nec/<int:pk>/get_all_rates/`: Returns all NEC exchange rates for a specific NEC.
+-   `/nec/<int:pk>/get_rate_on/<str:date>/`: Returns the NEC rate for a given date
+-   `/nec/<int:pk>/get_all_grades/`: Returns all the grades for a given NEC
+-   `/nec/<int:pk>/get_grade/<str:grade>/`: Returns the grade name and USD Minimum for a specific NEC and grade name.
 
 ## Response Format
 Data is returned in JSON format like so:
