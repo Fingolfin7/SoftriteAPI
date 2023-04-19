@@ -27,10 +27,25 @@ Request:
 http://127.0.0.1:8000/interbank/get_latest_rate
 ```
 
-Response: 
+Response:
 ```json
 {
     "rate": 989.0679,
     "date": "04-19-2023"
 }
 ```
+
+## Installation
+
+1. Clone the repository
+2. Create a virtual environment and activate it
+3. Install the requirements using `pip install -r requirements.txt`
+4. Run the server using `python manage.py runserver`
+5. Navigate to `http://127.0.0.1:8000/` to view the admin/support page
+
+## Other Requirements
+
+You need to have Java installed on your computer to get the scraper to work properly.
+You can download java from here: https://www.java.com/download/ie_manual.jsp
+This should automatically add Java to your system's PATH.
+You might need to restart your computer for this to take effect.
