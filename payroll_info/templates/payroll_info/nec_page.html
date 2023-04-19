@@ -1,0 +1,36 @@
+{% extends 'payroll_info/base.html' %}
+{% load static %}
+
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}
+            <div>
+                {{error}}
+            </div>
+        {% endfor %}
+        <div class="flex-row">
+            <label for="form.name.id">NEC Name: </label>
+            {{ form.name }}
+            {% if form.errors %}
+                <ul>
+                    {% for error in form.name.errors %}
+                        <li>
+                            {{error}}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div class="flex-row">
+            <a href="{% url 'payroll-home' %}">
+                <button type="button">
+                   Back
+                </button>
+            </a>
+            <input type="Submit" value="Add">
+        </div>
+    </form>
+
+{% endblock %}

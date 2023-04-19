@@ -1,0 +1,54 @@
+{% extends 'payroll_info/base.html' %}
+{% block content %}
+    <section id="grades_list">
+        {% csrf_token %}
+        {% if grades %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Grade</th>
+                        <th>USD Minimum</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                {% for obj in grades %}
+                    <tr>
+                        <td>{{ obj.grade }}
+                        <td>{{ obj.usd_minimum }}</td>
+                        <td>
+                            <a class="plain-link" href="{% url 'nec-grade-update' nec.id obj.id %}">
+                                <i class="material-icons">edit</i>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="plain-link" href="{% url 'nec-grade-delete' nec.id obj.id %}">
+                                <i class="material-icons">remove_circle</i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+         {% else %}
+            <p>
+                No grades added for the <b>{{ nec.name }}</b> NEC.
+            </p>
+        {% endif %}
+    </section>
+
+    <span class="button-row-left">
+        <a class="plain-link" href="{% url 'nec-grade-add' nec.id %} ">
+            <button type="button">
+                <i class="material-icons">add</i>
+                Grade
+            </button>
+        </a>
+
+        <a class="plain-link" href="{% url 'payroll-home' %}">
+            <button type="button">
+                <i class="material-icons">arrow_back</i>
+                Back
+            </button>
+        </a>
+    </span>
+{% endblock %}

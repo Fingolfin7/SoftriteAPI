@@ -1,0 +1,91 @@
+{% extends 'payroll_info/base.html' %}
+{% block content %}
+    <div id="home_page">
+        {% csrf_token %}
+        <section id="interbank_rate" >
+            <h4>Interbank Exchange Rate</h4>
+            <span class="flex-row">
+                <label><b>USD - ZWL Rate: </b></label>
+                {{ interbank_rate.rate }}
+
+                <label><b>Date: </b></label>
+                {{ interbank_rate.date }}
+
+                <a class="plain-link" href="{% url 'interbank-update' interbank_rate.id %}">
+                    <i class="material-icons">edit</i>
+                </a>
+
+                <a class="plain-link" href="{% url 'interbank-delete' interbank_rate.id %}">
+                    <i class="material-icons">remove_circle</i>
+                </a>
+            </span>
+            <br>
+        </section>
+
+        <span class="button-row">
+            <a class="plain-link" href="{% url 'interbank-rates' %}">
+                <button type="button">
+                    All Rates
+                </button>
+            </a>
+        </span>
+
+        <section id="nec_rates" style="border-bottom: var(--form-theme-color) solid thick;">
+            <h4> National Employment Councils </h4>
+
+            {% for nec in necs %}
+                <div class="collapsable" id="{{ nec.name }}_nec">
+                    <h5>
+                        {{ nec.name }} NEC Rate
+                        <a class="plain-link" href="{% url 'nec-delete' nec.id %}">
+                            <i class="material-icons">delete</i>
+                        </a>
+                    </h5>
+
+                    {% if nec.rates_set %}
+                        {% for nec_rate in nec.rates_set.all|slice:":3" %}
+                            <span class="flex-row">
+                            <label><b>USD - ZWL Rate:</b></label>
+                                <!-- show the rate formatted to 2 decimal places -->
+                            {{ nec_rate.rate|floatformat:2 }}
+                                <label><b>Date:</b></label>
+                            {{ nec_rate.date }}
+                            <a class="plain-link" href="{% url 'nec-rate-update' nec.id nec_rate.id %}">
+                                <i class="material-icons">edit</i>
+                            </a>
+
+                            <a class="plain-link" href="{% url 'nec-rate-delete' nec.id nec_rate.id %}">
+                                <i class="material-icons">remove_circle</i>
+                            </a>
+                        </span>
+                        {% endfor %}
+                    {% endif %}
+
+                    <span class="button-row">
+                        <a class="plain-link" href="{% url 'nec-rates' nec.id %}">
+                            <button type="button">
+                                View Rates
+                            </button>
+                        </a>
+
+                        <a class="plain-link" href="{% url 'nec-grades' nec.id %}">
+                            <button type="button">
+                                View Grades
+                            </button>
+                        </a>
+                    </span>
+                </div>
+            {% endfor %}
+
+            <span class="button-row">
+                <a class="plain-link" href="{% url 'nec-add' %}">
+                    <button type="button" style="display: block; margin: auto;">
+                        <i class="material-icons">add</i> NEC
+                    </button>
+                </a>
+            </span>
+        </section>
+
+
+    </div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'payroll_info/base.html' %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="flex-row">
+            <button type="submit">
+                {% if title == 'New Grade' %}
+                    <i class="material-icons">add</i>
+                    Grade
+                {%  else %}
+                    <i class="material-icons">send</i>
+                {% endif %}
+            </button>
+            <a class="plain-link" href="{% url 'nec-grades' nec.id %}">
+                <button type="button">
+                    Cancel
+                </button>
+            </a>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+{% load static %}
+{% load crispy_forms_tags %}
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'payroll_info/css/qfc-light.css' %}">
+        <link rel="stylesheet" href="{% static 'payroll_info/css/style2.css' %}">
+        <link rel="stylesheet" href="{% static 'payroll_info/css/tables.css' %}">
+        <!--
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codolog/form@1.0.0/dist/form.css">
+        -->
+        <link rel="stylesheet" href="{% static 'payroll_info/css/colours.css' %}">
+        <link rel="shortcut icon" href="{% static 'payroll_info/images/logo.jpeg' %}" type = "image/jpg">
+        {% if title %}
+            <title>{{ title }}</title>
+        {% else %}
+            <title>Softrite API</title>
+        {% endif %}
+    </head>
+
+    <body>
+        <!--<div class="container--center-middle">
+            {% if messages %}
+                {% for message in messages%}
+                    {% if message.tag == 'error'%}
+                        <div class="card cadmium-red ">class=""
+                            <b><em> {{ message }} </em></b>
+                        </div>
+                    {% elif message.tag == 'info'%}
+                        <div class="card cobalt-blue">
+                          <b><em> {{ message }} </em></b>
+                        </div>
+                    {% else %}
+                        <div class="card dodgerblue">
+                          <b><em> {{ message }} </em></b>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>-->
+
+        <div class="qfc-container">
+            <div class="ribbon-container">
+                {% if messages %}
+                    {% for message in messages%}
+                        {% if message.tag == 'error'%}
+                            <div class="card cadmium-red ">
+                              <b><em> {{ message }} </em></b>
+                            </div>
+                        {% elif message.tag == 'info'%}
+                            <div class="card cobalt-blue">
+                              <b><em> {{ message }} </em></b>
+                            </div>
+                        {% else %}
+                            <div class="card lincolngreen">
+                              <b><em> {{ message }} </em></b>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <a href="{% url 'payroll-home' %}">
+                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
+                    </a>
+                {% endif %}
+            </div>
+
+            {% block content %}
+            {% endblock content%}
+        </div>
+    </body>
+</html>

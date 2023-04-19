@@ -1,0 +1,4 @@
+You need to have Java installed on your computer to get the scraper to work properly.
+You can download java from here: https://www.java.com/download/ie_manual.jsp
+This should automatically add Java to your system's PATH.
+You might need to restart your computer for this to take effect.

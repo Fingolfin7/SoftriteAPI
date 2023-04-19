@@ -1,0 +1,22 @@
+{% extends 'payroll_info/base.html' %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+         <span class="button-row-left">
+            <button type="submit">
+                <i class="material-icons">save</i>
+                Save
+            </button>
+
+            <a class="plain-link" href="{% url 'nec-rates' nec.id %}">
+                <button type="button">
+                    <i class="material-icons">cancel</i>
+                    Cancel
+                </button>
+            </a>
+        </span>
+    </form>
+{% endblock %}

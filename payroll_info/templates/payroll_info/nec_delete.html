@@ -1,0 +1,15 @@
+{% extends 'payroll_info/base.html' %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="flex-row">
+            <p> Are you sure you want to delete {{ nec.name }}?</p>
+        </div>
+        <div class="flex-row">
+            <button type="submit">Yes</button>
+            <a class="plain-link" href="{% url 'payroll-home' %}">
+                <button type="button">No</button>
+            </a>
+        </div>
+    </form>
+{% endblock %}
