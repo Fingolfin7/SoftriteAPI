@@ -5,3 +5,5 @@ tabula-py
 tabulate
 django-crispy-forms
 lxml
+camelot-py[cv]
+PyPDF2<3.0

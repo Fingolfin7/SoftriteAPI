@@ -1,10 +1,17 @@
+import os
 import re
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from io import BytesIO
-from tabula import read_pdf
+import camelot
 from tabulate import tabulate
 from bs4 import BeautifulSoup
 from datetime import datetime
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def download_rbz_pdf_binary():
@@ -12,6 +19,7 @@ def download_rbz_pdf_binary():
     Downloads the latest RBZ exchange rate PDF file and returns the binary content of the file.
     :return: binary content of the pdf file or False if not found
     """
+
     month = datetime.today().strftime("%B").lower()
     year = datetime.today().strftime("%Y")
 
@@ -22,45 +30,70 @@ def download_rbz_pdf_binary():
     requests.packages.urllib3.disable_warnings()
 
     # setting verify to false to ignore SSL certificate verification (rbz doesn't have a valid certificate)
-    response = requests.get(daily_url, verify=False)
+    retry_strategy = Retry(
+        total=5,
+        status_forcelist=[429, 500, 502, 503, 504],
+        backoff_factor=1
+    )
 
-    html = BeautifulSoup(response.text, "lxml")
-    fileTable = html.find('article', class_="item-page").find('table')
+    adapter = HTTPAdapter(max_retries=retry_strategy)
 
-    # find the latest link from the table by iterating backwards to check for valid links
-    for row in reversed(fileTable.find("tbody").findAll('tr')):
-        link_cell = row.findAll('td')[-1]
-        link = link_cell.find('a')
+    http = requests.Session()
+    http.mount("https://", adapter)
+    http.mount("http://", adapter)
 
-        if link:
-            file_url = link['href']
-            response = requests.get(base_url + file_url, verify=False)
-            return response.content
+    for i in range(5):
+        try:
+            response = http.get(daily_url, verify=False, timeout=None)
+            html = BeautifulSoup(response.text, "lxml")
+            fileTable = html.find('article', class_="item-page").find('table')
+
+            # find the latest link from the table by iterating backwards to check for valid links
+            for row in reversed(fileTable.find("tbody").findAll('tr')):
+                link_cell = row.findAll('td')[-1]
+                link = link_cell.find('a')
+
+                if link:
+                    file_url = link['href']
+                    response = http.get(base_url + file_url, verify=False, timeout=None)
+                    logger.info(
+                        'Download file: {} (status {})'.format('success ' if response.status_code == 200 else 'failed',
+                                                               response.status_code))
+                    # return response.content
+
+                    with open("rbz.pdf",
+                              "wb") as f:  # save the pdf file to the filesystem and return the path to the file
+                        f.write(response.content)
+                    return os.path.abspath("rbz.pdf")
+
+        except requests.exceptions.RequestException as e:
+            logger.info("Attempt {} failed with error: {}".format(i + 1, e))
+            continue
+
     return False
 
 
-def get_rbz_rate(file_content: bytes):
+def get_rbz_rate(filename: str):
     """
     Extracts the 'mid' exchange rate of the Zimbabwean dollar (ZWL) to the US dollar (USD) from a PDF file.
-    :param file_content: the binary content of the pdf file
+    :param filename: the binary content of the pdf file
     :return: the zwl to usd mid rate or False if not found
     """
 
-    # read in the pdf binary content as a pandas dataframe using tabula
-    df = read_pdf(BytesIO(file_content), pages="all")
+    # read in the pdf binary content as a pandas dataframe using camelot
+    tables = camelot.read_pdf(filepath=filename, pages="all")
+
+    # delete the pdf file
+    os.remove(filename)
 
     # get data from every page
-    for dt in df:
-        html_body = tabulate(dt, headers='keys', tablefmt='html')
-        html = BeautifulSoup(html_body, "lxml")
-        table = html.find('table')
+    for table in tables:
+        df = table.df
         zwlMidRateIndex = 8  # the index of the midrate in the table
 
-        for row in table.findAll('tr'):
-            if row.text.find("USD") != -1:
-                # get the text from the inner-tags but separate them with a space
-                row_text = row.get_text(" ", strip=True)
-                rateList = row_text.split(" ")
+        for index, row in df.iterrows():
+            if "USD" in row.to_string():
+                rateList = row.to_string().split(" ")
                 rateList = [item for item in rateList if item != '']
                 rate = rateList[zwlMidRateIndex]
 

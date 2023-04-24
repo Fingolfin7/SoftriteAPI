@@ -8,26 +8,30 @@ from .forms import *
 from .scrapers.rbz_rate import download_rbz_pdf_binary, get_rbz_rate
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.exceptions import ObjectDoesNotExist
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def update_rbz_rate():
     # if the rate for today is not in the database, then download the pdf and get the rate,
     # else get the rate from the database
     if not InterbankUSDRate.objects.filter(date=datetime.today()).exists():
-        print("Getting latest RBZ pdf file...")
+        logger.info("Getting latest RBZ pdf file...")
         try:
             latest_pdf_binary = download_rbz_pdf_binary()
+            # logger.info("Data exists: {}".format(type(latest_pdf_binary))
             if latest_pdf_binary:
-                print("Getting RBZ ZWL-USD rate...")
+                logger.info("Getting RBZ ZWL-USD rate...")
                 try:
                     mid_rate = get_rbz_rate(latest_pdf_binary)
                     if mid_rate:
-                        print(f"RBZ ZWL-USD rate: {mid_rate}")
+                        logger.info("RBZ ZWL-USD rate: {}".format(mid_rate))
                         InterbankUSDRate.objects.create(rate=mid_rate)
                 except Exception as e:
-                    print("Error getting rate. Error: ", e)
+                    logger.info("Error getting rate. Error: {}".format(e))
         except Exception as e:
-            print("Download error. Error: ", e)
+            logger.info("Download error. Error: {}".format(e))
 
 
 # api endpoint to get the most recent rate.

@@ -2,3 +2,11 @@ You need to have Java installed on your computer to get the scraper to work prop
 You can download java from here: https://www.java.com/download/ie_manual.jsp
 This should automatically add Java to your system's PATH.
 You might need to restart your computer for this to take effect.
+
+Update:
+I have changed the pdf extraction function to use camelot-py instead of tabula-py.
+I did this because tabula requires java to be installed on your computer (and java doesn't work on IIS servers),
+and camelot-py does not.
+Instead you will need to download GhostScript from here: https://ghostscript.com/releases/gsdnld.html
+and add it your path if necessary
+

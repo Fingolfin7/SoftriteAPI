@@ -43,7 +43,7 @@
                     </h5>
 
                     {% if nec.rates_set %}
-                        {% for nec_rate in nec.rates_set.all|slice:":3" %}
+                        {% for nec_rate in nec.rates_set.all|dictsortreversed:'date'|slice:":2" %}
                             <span class="flex-row">
                             <label><b>USD - ZWL Rate:</b></label>
                                 <!-- show the rate formatted to 2 decimal places -->
