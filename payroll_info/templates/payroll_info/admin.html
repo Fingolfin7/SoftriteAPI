@@ -49,7 +49,7 @@
                                 <!-- show the rate formatted to 2 decimal places -->
                             {{ nec_rate.rate|floatformat:2 }}
                                 <label><b>Date:</b></label>
-                            {{ nec_rate.date }}
+                            {{ nec_rate.date|date:'F Y'}}
                             <a class="plain-link" href="{% url 'nec-rate-update' nec.id nec_rate.id %}">
                                 <i class="material-icons">edit</i>
                             </a>

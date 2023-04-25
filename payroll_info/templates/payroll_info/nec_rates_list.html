@@ -13,7 +13,7 @@
              </thead>
             {% for obj in rates %}
                 <tr>
-                    <td>{{ obj.date }}</td>
+                    <td>{{ obj.date|date:'F Y' }}</td>
                     <td>{{ obj.rate }}</td>
                     <td>
                         <a class="plain-link" href="{% url 'nec-rate-update' nec.id obj.id %}">

@@ -1,15 +1,14 @@
 import os
 import re
+import PyPDF2
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-from io import BytesIO
 import camelot
-from tabulate import tabulate
-from bs4 import BeautifulSoup
-from datetime import datetime
-
 import logging
+from datetime import datetime
+from bs4 import BeautifulSoup
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +81,13 @@ def get_rbz_rate(filename: str):
 
     # read in the pdf binary content as a pandas dataframe using camelot
     tables = camelot.read_pdf(filepath=filename, pages="all")
+    # creating a pdf reader object
+    reader = PyPDF2.PdfReader(filename)
+
+    match = re.search(r"\b[A-Z][a-z]+day,\s\d{1,2}\s[A-Z][a-z]+\s\d{4}\b", reader.pages[0].extract_text())
+    date = datetime.strptime(match.group(), "%A, %d %B %Y").date()
+    date = date.strftime("%m-%d-%Y")
+    # logger.info(f"PDF Date: {date}")
 
     # delete the pdf file
     os.remove(filename)
@@ -101,7 +107,7 @@ def get_rbz_rate(filename: str):
                 rate = re.sub(",", "", rate)
                 rate = re.sub("(\d) (\d)", r"\1\2", rate)
 
-                return float(rate)
+                return {'rate': float(rate), 'date': date}
     return False
 
 

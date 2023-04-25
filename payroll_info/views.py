@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.urls import reverse
 from .models import *
 from .forms import *
+import os
 from .scrapers.rbz_rate import download_rbz_pdf_binary, get_rbz_rate
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.exceptions import ObjectDoesNotExist
@@ -26,8 +27,13 @@ def update_rbz_rate():
                 try:
                     mid_rate = get_rbz_rate(latest_pdf_binary)
                     if mid_rate:
-                        logger.info("RBZ ZWL-USD rate: {}".format(mid_rate))
-                        InterbankUSDRate.objects.create(rate=mid_rate)
+                        logger.info("RBZ ZWL-USD rate: {} on {}".format(mid_rate['rate'], mid_rate['date']))
+                        # check if the rate for this date is already in the database
+                        date = datetime.strptime(mid_rate['date'], '%m-%d-%Y')
+                        if not InterbankUSDRate.objects.filter(date=date).exists():
+                            InterbankUSDRate.objects.create(date=date, rate=mid_rate['rate'])
+                        else:
+                            logger.info("Rate for {} date already exists".format(date))
                 except Exception as e:
                     logger.info("Error getting rate. Error: {}".format(e))
         except Exception as e:
