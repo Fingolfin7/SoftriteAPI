@@ -3,10 +3,12 @@
     <div id="home_page">
         {% csrf_token %}
         <section id="interbank_rate" >
-            <h4>Interbank Exchange Rate</h4>
+            <span class="section-header">
+                Interbank Exchange Rate
+            </span>
             <span class="flex-row">
-                <label><b>USD - ZWL Rate: </b></label>
-                {{ interbank_rate.rate }}
+                <label><b>Rate: </b></label>
+                {{ interbank_rate.rate|floatformat:2 }}
 
                 <label><b>Date: </b></label>
                 {{ interbank_rate.date }}
@@ -30,8 +32,10 @@
             </a>
         </span>
 
-        <section id="nec_rates" style="border-bottom: var(--form-theme-color) solid thick;">
-            <h4> National Employment Councils </h4>
+        <section id="nec_rates">
+            <span class="section-header">
+                National Employment Councils
+            </span>
 
             {% for nec in necs %}
                 <div class="collapsable" id="{{ nec.name }}_nec">
@@ -45,7 +49,7 @@
                     {% if nec.rates_set %}
                         {% for nec_rate in nec.rates_set.all|dictsortreversed:'date'|slice:":2" %}
                             <span class="flex-row">
-                            <label><b>USD - ZWL Rate:</b></label>
+                            <label><b>ZWL Rate:</b></label>
                                 <!-- show the rate formatted to 2 decimal places -->
                             {{ nec_rate.rate|floatformat:2 }}
                                 <label><b>Date:</b></label>

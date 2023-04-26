@@ -12,17 +12,17 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 
 logger = logging.getLogger(__name__)
+sndLogger = logging.getLogger('apscheduler')
 
 
 def update_rbz_rate():
-    logger.info("Called update_rbz_rate")
+    sndLogger.info("Called update_rbz_rate")
     # if the rate for today is not in the database, then download the pdf and get the rate,
     # else get the rate from the database
     if not InterbankUSDRate.objects.filter(date=datetime.today()).exists():
         logger.info("Getting latest RBZ pdf file...")
         try:
             latest_pdf_binary = download_rbz_pdf_binary()
-            # logger.info("Data exists: {}".format(type(latest_pdf_binary))
             if latest_pdf_binary:
                 logger.info("Getting RBZ ZWL-USD rate...")
                 try:
@@ -250,6 +250,7 @@ class InterbankUpdateView(UpdateView):
     model = InterbankUSDRate
     template_name = 'payroll_info/interbank_page.html'
     form_class = InterbankUSDRateForm
+    success_url = '/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -271,6 +272,7 @@ class InterbankDeleteView(DeleteView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Delete Interbank Rate'
         return context
+
 
 class NecCreateView(CreateView):
     model = NEC

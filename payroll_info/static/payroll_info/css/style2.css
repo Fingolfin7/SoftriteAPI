@@ -4,12 +4,16 @@
   padding: 0.5% auto 0.5% 5%;
   margin-bottom: 2%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
 .ribbon-logo{
-  width: 30%;
+  width: 40%;
+}
+
+.ribbon-container a {
+  text-align: center;
 }
 
 .container, .container--center-middle{
@@ -41,9 +45,7 @@
   margin-bottom: 1rem;
   padding: 1rem;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.35);
-}
-
-.flex-row{
+}  .flex-row{
   display: flex;
   justify-content: space-between;
   align-items: center;

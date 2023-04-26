@@ -121,6 +121,18 @@ h6 {
   font-weight: 400;
 }
 
+.section-header{
+  width: 100%;
+  display: block;
+  background-color: var(--form-theme-color);
+  color: white;
+  text-align: center;
+  font-size: 1.5em;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin: 1.33em 0;
+}
+
 .qfc-container h1:not(.no-underline):after,
 .qfc-container h2:not(.no-underline):after,
 .qfc-container h3:not(.no-underline):after,
@@ -133,7 +145,7 @@ h6 {
   bottom: 0;
   margin-bottom: 31px;
   width: 100%;
-  border: 3px solid var(--form-theme-color);
+  border: 2px solid var(--form-theme-color);
 }
 
 .qfc-container .no-underline+h1,
