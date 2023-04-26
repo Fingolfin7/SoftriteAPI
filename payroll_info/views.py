@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def update_rbz_rate():
+    logger.info("Called update_rbz_rate")
     # if the rate for today is not in the database, then download the pdf and get the rate,
     # else get the rate from the database
     if not InterbankUSDRate.objects.filter(date=datetime.today()).exists():
