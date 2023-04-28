@@ -76,38 +76,34 @@ def get_rbz_rate(filename: str):
     """
     Extracts the 'mid' exchange rate of the Zimbabwean dollar (ZWL) to the US dollar (USD) from a PDF file.
     :param filename: the binary content of the pdf file
-    :return: the zwl to usd mid rate or False if not found
+    :return: the zwl to usd midrate or False if not found
     """
 
-    # read in the pdf binary content as a pandas dataframe using camelot
-    tables = camelot.read_pdf(filepath=filename, pages="all")
     # creating a pdf reader object
     reader = PyPDF2.PdfReader(filename)
-
-    match = re.search(r"\b[A-Z][a-z]+day,\s\d{1,2}\s[A-Z][a-z]+\s\d{4}\b", reader.pages[0].extract_text())
-    date = datetime.strptime(match.group(), "%A, %d %B %Y").date()
-    date = date.strftime("%m-%d-%Y")
-    # logger.info(f"PDF Date: {date}")
+    page_text = reader.pages[0].extract_text()  # grab the text from the first page of the pdf file
 
     # delete the pdf file
     os.remove(filename)
 
-    # get data from every page
-    for table in tables:
-        df = table.df
-        zwlMidRateIndex = 8  # the index of the midrate in the table
+    date_str = re.findall(r"\b[A-Z][a-z]+day,\s\d{1,2}\s[A-Z][a-z]+\s\d{4}\b", page_text)[0]
+    date = datetime.strptime(date_str, "%A, %d %B %Y").date()
+    date = date.strftime("%m-%d-%Y")
 
-        for index, row in df.iterrows():
-            if "USD" in row.to_string():
-                rateList = row.to_string().split(" ")
-                rateList = [item for item in rateList if item != '']
-                rate = rateList[zwlMidRateIndex]
+    # make a regex to find the line with "USD" in it, and split that line into a list
+    rateList = re.findall(r"USD.*", page_text)
 
-                # remove commas and spaces from the rate
-                rate = re.sub(",", "", rate)
-                rate = re.sub("(\d) (\d)", r"\1\2", rate)
+    if len(rateList):
+        rateList = rateList[0].split()  # split the line into a list
+        rateList = [item for item in rateList if item != '']
+        rate = rateList[-1]
 
-                return {'rate': float(rate), 'date': date}
+        # remove commas and spaces from the rate
+        rate = re.sub(",", "", rate)
+        rate = re.sub("(\d) (\d)", r"\1\2", rate)
+
+        return {'rate': float(rate), 'date': date}
+
     return False
 
 

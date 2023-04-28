@@ -4,7 +4,7 @@ from datetime import datetime
 
 class InterbankUSDRate(models.Model):
     # Interbank USD to ZWL middle Rate
-    date = models.DateField(default=datetime.today)
+    date = models.DateField(default=datetime.today, unique=True)
     rate = models.FloatField()
 
     def __str__(self):
