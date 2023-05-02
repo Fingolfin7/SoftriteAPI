@@ -47,6 +47,7 @@ def download_rbz_pdf_binary():
     header_div = top_div.find('div', class_='page-header')
     header = header_div.find('h2')
     link = header.find('a')
+
     daily_url = base_url + link.get('href')  # get the link to the daily exchange rates page
 
     logger.info(f"Daily URL: {daily_url}")
