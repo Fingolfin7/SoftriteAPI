@@ -209,7 +209,7 @@ def get_nec_grade(request, **kwargs):
 
 
 def home(request):
-    update_rbz_rate()
+    # update_rbz_rate()
     necs = NEC.objects.all()
     interbank_instance = InterbankUSDRate.objects.order_by('-date').first()  # ordered by date descending (latest first)
 
@@ -227,6 +227,7 @@ class InterbankListView(ListView):
     template_name = 'payroll_info/interbank_list.html'
     context_object_name = 'inter_rates'
     ordering = ['-date']  # ordered by date descending (latest first)
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -314,6 +315,7 @@ class NecRatesListView(ListView):
     template_name = 'payroll_info/nec_rates_list.html'
     context_object_name = 'rates'
     ordering = ['-date']
+    paginate_by = 10
 
     def get_queryset(self):
         return NEC.objects.get(id=self.kwargs['pk']).rates_set.order_by("-date")
@@ -401,6 +403,7 @@ class NecGradesListView(ListView):
     template_name = 'payroll_info/nec_grades_list.html'
     context_object_name = 'grades'
     ordering = ['grade']
+    paginate_by = 10
 
     def get_queryset(self):
         return NEC.objects.get(id=self.kwargs['pk']).grades_set.order_by("grade")

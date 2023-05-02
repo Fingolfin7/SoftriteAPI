@@ -21,10 +21,7 @@ def download_rbz_pdf_binary():
 
     month = datetime.today().strftime("%B").lower()
     year = datetime.today().strftime("%Y")
-
-    base_url = "https://www.rbz.co.zw/"
-    daily_url = f"{base_url}index.php/research/markets/exchange-rates/13-daily-exchange-rates/1188-{month}-{year}"
-
+    # http request settings
     # suppress warnings about insecure SSL certificate
     requests.packages.urllib3.disable_warnings()
 
@@ -40,6 +37,20 @@ def download_rbz_pdf_binary():
     http = requests.Session()
     http.mount("https://", adapter)
     http.mount("http://", adapter)
+
+    base_url = "https://www.rbz.co.zw/"
+
+    # get the correct url for the daily exchange rates
+    monthly_links_page = base_url + "index.php/research/markets/exchange-rates"
+    response = http.get(monthly_links_page, verify=False, timeout=None)
+    html = BeautifulSoup(response.text, "lxml")
+    top_div = html.find('div', id='archive-items').findAll('div')[0]  # get the first/top div in the archive-items div
+    header_div = top_div.find('div', class_='page-header')
+    header = header_div.find('h2')
+    link = header.find('a')
+    daily_url = base_url + link.get('href')  # get the link to the daily exchange rates page
+
+    logger.info(f"Daily URL: {daily_url}")
 
     for i in range(5):
         try:
