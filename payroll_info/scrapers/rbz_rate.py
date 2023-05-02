@@ -2,7 +2,6 @@ import os
 import re
 import PyPDF2
 import requests
-import camelot
 import logging
 from datetime import datetime
 from bs4 import BeautifulSoup
