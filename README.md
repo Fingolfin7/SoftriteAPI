@@ -1,10 +1,10 @@
 # SoftriteAPI
 API project to provide Adaski with updated payroll information over the internet including the latest RBZ Interbank Exchange rates and NEC rates and grades. 
-The project also includes a scraper that downloads the latest exchange rate pdf from the RBZ website and extracts the latest USD-ZWL rate using the `tabula` and `tabulate` modules
+The project also includes a scraper that downloads the latest exchange rate pdf from the RBZ website and extracts the latest USD-ZWL rate.
 
 ## Admin/Support Pages
 
-![image](https://user-images.githubusercontent.com/63872314/233022466-f06524ca-dc91-4339-992c-7487b6d9c571.png)
+![image](https://github.com/Fingolfin7/SoftriteAPI/assets/63872314/4897eddd-8f4a-4e07-ae6e-29c351166f04)
 
 ## API Endpoints
 Here's a list of all the endpoints so far:
@@ -42,10 +42,3 @@ Response:
 3. Install the requirements using `pip install -r requirements.txt`
 4. Run the server using `python manage.py runserver`
 5. Navigate to `http://127.0.0.1:8000/` to view the admin/support page
-
-## Other Requirements
-
-You need to have Java installed on your computer to get the scraper to work properly.
-You can download java from here: https://www.java.com/download/ie_manual.jsp
-This should automatically add Java to your system's PATH.
-You might need to restart your computer for this to take effect.
