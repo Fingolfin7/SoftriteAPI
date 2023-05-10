@@ -37,10 +37,10 @@ def download_rbz_pdf_binary():
     http.mount("https://", adapter)
     http.mount("http://", adapter)
 
-    base_url = "https://www.rbz.co.zw/"
+    base_url = "https://www.rbz.co.zw"
 
     # get the correct url for the daily exchange rates
-    monthly_links_page = base_url + "index.php/research/markets/exchange-rates"
+    monthly_links_page = base_url + "/index.php/research/markets/exchange-rates"
     response = http.get(monthly_links_page, verify=False, timeout=None)
     html = BeautifulSoup(response.text, "lxml")
     top_div = html.find('div', id='archive-items').findAll('div')[0]  # get the first/top div in the archive-items div
