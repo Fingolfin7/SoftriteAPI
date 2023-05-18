@@ -33,7 +33,9 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'payroll_info.apps.PayrollInfoConfig',
+    'users.apps.UsersConfig',
     'crispy_forms',
+    'crispy_bootstrap4',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -178,7 +180,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+
+LOGIN_REDIRECT_URL = 'profile'
+
+LOGIN_URL = 'login'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

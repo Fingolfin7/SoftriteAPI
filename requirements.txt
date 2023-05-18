@@ -1,7 +1,9 @@
 beautifulsoup4
 Django
 requests
+Pillow
 django-crispy-forms
+crispy-bootstrap4
 lxml
 PyPDF2<3.0
 apscheduler

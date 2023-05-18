@@ -1,0 +1,18 @@
+{% extends 'users/base.html'%}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% block content %}
+   <form method="post" enctype="multipart/form-data">
+       {% csrf_token %}
+       <span class="section-header">Signup</span>
+       {{ form|crispy }}
+       <div class="flex-row">
+           <input type="submit" class="button" id="signup" value="Signup">
+           <a class="button-link" id="signup-btn" href="{% url 'login' %}">
+               <button type="button" class="button">
+                   Go to Login
+               </button>
+           </a>
+       </div>
+   </form>
+{% endblock %}

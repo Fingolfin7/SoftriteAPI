@@ -1,0 +1,27 @@
+{% extends 'users/base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <form  method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <span class="section-header">Update Profile</span>
+
+        <span class="flex-row" style="width: 50%">
+            <img class="account-img" src="{{ user.profile.image.url }}">
+            {{ user.username }}
+        </span>
+
+        <label for="{{ profile_form.image.id_for_label }}" class="custom-file-upload">
+            <i class="material-icons">cloud_upload</i>
+            Upload Image
+            {{ profile_form.image }}
+        </label>
+
+        <div class="button-row">
+            <input type="submit" class="button" value="Update">
+        </div>
+        350248596
+
+    </form>
+
+{% endblock content %}
