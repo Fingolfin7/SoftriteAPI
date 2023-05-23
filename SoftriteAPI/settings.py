@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'payroll_info.apps.PayrollInfoConfig',
     'users.apps.UsersConfig',
+    'backups.apps.BackupsConfig',
     'crispy_forms',
     'crispy_bootstrap4',
     'django.contrib.admin',
