@@ -36,7 +36,7 @@ def upload(request):
     View for uploading a backup file from Adaski via http.
     This view takes a POST request with a file and saves it to the server's filesystem.
     Each backup file is saved with a unique name based on the user's/company's profile name and
-    the date and time of upload.
+    the date and time of upload. A backup record is also created in the database.
     """
     print(request.FILES)
     if request.method == 'POST':
@@ -62,9 +62,6 @@ def upload(request):
             if not os.path.exists(saveDir):
                 os.makedirs(saveDir)  # makedirs creates all the directories in the path if they don't exist
             savePath = os.path.join(saveDir, file.name)
-
-            filesize_str = convert_size(file.size)
-            print(filesize_str)
 
             backup = Backup(user=user, file=file, filesize=file.size, filesize_str=convert_size(file.size))
             backup.file.name = savePath

@@ -1,5 +1,12 @@
 {% extends 'users/base.html'%}
 {% block content %}
-    <h1>You have been logged out</h1>
-    <a class="link" href="{% url 'login' %}">Login Again</a>
+    <span class="section-header">You have been logged out</span>
+    <span class="button-row">
+        <a class="button-link" href="{% url 'login' %}">
+            <button type="button">
+                Login Again
+            </button>
+        </a>
+    </span>
+
 {% endblock %}
