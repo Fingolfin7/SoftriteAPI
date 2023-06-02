@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cleanup.apps.CleanupConfig',  # delete old files and images on filefield and imagefield update/delete
 ]
 
 SESSION_COOKIE_SECURE = True
@@ -137,11 +138,11 @@ LOGGING = {
             "filename": "info.log",
             "formatter": "verbose",
         },
-        'apscheduler_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'apscheduler.log',
-            'formatter': 'apscheduler'
+        "apscheduler_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": "apscheduler.log",
+            "formatter": "apscheduler",
         }
     },
     "loggers": {
