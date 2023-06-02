@@ -23,11 +23,11 @@
 
     <body>
         <div class="qfc-container">
-            <div class="ribbon-container">
-                <a href="#">
+            <section class="ribbon-container">
+                <a href="{% url 'payroll-home' %}">
                     <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
                 </a>
-            </div>
+            </section>
 
             <section id="messages">
                 {% if messages %}

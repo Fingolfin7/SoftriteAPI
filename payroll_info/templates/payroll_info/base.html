@@ -43,30 +43,42 @@
         </div>-->
 
         <div class="qfc-container">
-            <div class="ribbon-container">
+            <section class="ribbon-container">
+                <a href="{% url 'payroll-home' %}">
+                    <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
+                </a>
+                {%if user.is_authenticated %}
+                    <div>
+                        <a class="plain-link plain" href="{% url 'profile' %}" style="padding-right:2.5rem;">
+                            <b>{{ user.username | title }}</b>
+                        </a>
+                        <a class="plain-link" href="{% url 'logout' %}">Logout</a>
+                    </div>
+                {% else %}
+                    <div>
+                        <a class="plain-link" href="{% url 'login' %}">Login</a>
+                    </div>
+                {% endif %}
+            </section>
+            <section id="messages">
                 {% if messages %}
                     {% for message in messages%}
-                        {% if message.tag == 'error'%}
-                            <div class="card cadmium-red ">
-                              <b><em> {{ message }} </em></b>
+                        {% if message.tags == 'error'%}
+                            <div class="inner-card cadmium-red ">
+                                <em> {{ message }} </em>
                             </div>
-                        {% elif message.tag == 'info'%}
-                            <div class="card cobalt-blue">
-                              <b><em> {{ message }} </em></b>
+                        {% elif message.tags == 'info'%}
+                            <div class="inner-card cobalt-blue">
+                                <em> {{ message }} </em>
                             </div>
                         {% else %}
-                            <div class="card lincolngreen">
-                              <b><em> {{ message }} </em></b>
+                            <div class="inner-card lincolngreen">
+                                <em> {{ message }} </em>
                             </div>
                         {% endif %}
                     {% endfor %}
-                {% else %}
-                    <a href="{% url 'payroll-home' %}">
-                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
-                    </a>
                 {% endif %}
-            </div>
-
+            </section>
             {% block content %}
             {% endblock content%}
         </div>

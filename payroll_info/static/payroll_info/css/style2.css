@@ -1,19 +1,34 @@
 /* ribbon */
-.ribbon-container{
+.ribbon-container-center{
   width: 100%;
-  padding: 0.5% auto 0.5% 5%;
+  /*padding: 0.5% 5% 0.5% 5%;*/
   margin-bottom: 2%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.ribbon-logo{
+.ribbon-container{
+  width: 100%;
+  /*padding: 0.5% 5% 0.5% 5%;*/
+  margin-bottom: 2%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ribbon-logo-center{
   width: 40%;
 }
 
-.ribbon-container a {
+.ribbon-logo{
+  width: 40%;
+  display: block;
+}
+
+.ribbon-container > a {
   text-align: center;
+  width: 30%;
 }
 
 .container, .container--center-middle{
@@ -90,6 +105,33 @@
 .flex-column{
   display: flex;
   flex-direction: column;
+}
+
+/*file upload button*/
+
+.custom-file-upload{
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #2a3c90;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  height: 100%;
+  transition: 0.3s;
+}
+
+.round-upload{
+  width: auto;
+  border-radius: 100%;
+}
+
+.custom-file-upload > input[type="file"],
+ label > input[type="file"] {
+    display: none;
 }
 
 .right{

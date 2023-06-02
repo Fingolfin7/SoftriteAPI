@@ -12,24 +12,6 @@ from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User
 
 
-# Create your views here.
-
-def convert_size(size_bytes: int) -> str:
-    """ Takes a file size in bytes and returns a string with the appropriate unit.
-    E.g. 1024 bytes -> 1 KB  or 1024 MB -> 1 GB
-    """
-    if size_bytes == 0:
-        return '0 bytes'
-    elif 0 < size_bytes < 1024:
-        return f"{size_bytes} bytes"
-    elif 1024 <= size_bytes < pow(1024, 2):
-        return f"{round(size_bytes / 1024, 2)} KB"  # divide by 1024 to get KB
-    elif pow(1024, 2) <= size_bytes < pow(1024, 3):
-        return f"{round(size_bytes / pow(1024, 2), 2)} MB"  # divide by 1024  to get MB
-    else:
-        return f"{round(size_bytes / pow(1024, 3), 2)} GB"  # divide by 1024 thrice to get GB
-
-
 @csrf_exempt
 def upload(request):
     """
@@ -63,7 +45,7 @@ def upload(request):
                 os.makedirs(saveDir)  # makedirs creates all the directories in the path if they don't exist
             savePath = os.path.join(saveDir, file.name)
 
-            backup = Backup(user=user, file=file, filesize=file.size, filesize_str=convert_size(file.size))
+            backup = Backup(user=user, file=file)
             backup.file.name = savePath
 
             # for old_bc in Backup.objects.filter(user=user):
