@@ -144,3 +144,4 @@ cython_debug/
 /.vs
 /static
 .sqlite3
+*.sqlite3
