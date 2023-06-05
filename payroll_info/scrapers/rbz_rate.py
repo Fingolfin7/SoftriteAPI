@@ -17,9 +17,6 @@ def download_rbz_pdf_binary():
     Downloads the latest RBZ exchange rate PDF file and returns the binary content of the file.
     :return: binary content of the pdf file or False if not found
     """
-
-    month = datetime.today().strftime("%B").lower()
-    year = datetime.today().strftime("%Y")
     # http request settings
     # suppress warnings about insecure SSL certificate
     requests.packages.urllib3.disable_warnings()
@@ -76,7 +73,7 @@ def download_rbz_pdf_binary():
                         f.write(response.content)
                     return os.path.abspath("rbz.pdf")
 
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             logger.info("Attempt {} failed with error: {}".format(i + 1, e))
             continue
 
@@ -97,9 +94,13 @@ def get_rbz_rate(filename: str):
     # delete the pdf file
     os.remove(filename)
 
-    date_str = re.findall(r"\b[A-Z][a-z]+day,\s\d{1,2}\s[A-Z][a-z]+\s\d{4}\b", page_text)[0]
-    date = datetime.strptime(date_str, "%A, %d %B %Y").date()
-    date = date.strftime("%m-%d-%Y")
+    try:
+        date_str = re.findall(r"[A-Z][a-z]+day,\s\d{1,2}\s[A-Z][a-z]+\s\d{4}", page_text)[0]
+        date = datetime.strptime(date_str, "%A, %d %B %Y").date()
+        date = date.strftime("%m-%d-%Y")
+    except (IndexError, ValueError):
+        logger.info("Date not found in pdf file. Using today's date.")
+        date = datetime.today().strftime("%m-%d-%Y")
 
     # make a regex to find the line with "USD" in it, and split that line into a list
     rateList = re.findall(r"USD.*", page_text)
@@ -133,5 +134,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
