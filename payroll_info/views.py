@@ -38,9 +38,9 @@ def update_rbz_rate():
                         else:
                             logger.info("Rate for {} date already exists".format(date))
                 except Exception as e:
-                    logger.info("Error getting rate. Error: {}".format(e))
+                    logger.error("Error getting rate. Error: {}".format(e))
         except Exception as e:
-            logger.info("Download error. Error: {}".format(e))
+            logger.error("Download error. Error: {}".format(e))
 
 
 # api endpoint to get the most recent rate.

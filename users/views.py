@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm, UpdateProfileForm, UserLoginForm
+from backups.models import Backup
 from django.contrib import messages
 
 
@@ -45,5 +46,8 @@ def profile(request):
     else:
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
-    return render(request, 'users/profile.html', {'profile_form': profile_form, 'title': 'Profile'})
+    backups = Backup.objects.filter(user=request.user).order_by('-date_uploaded')[0:5]  # get the 5 most recent backups
+    return render(request, 'users/profile.html', {'profile_form': profile_form,
+                                                  'title': 'Profile',
+                                                  'backups': backups})
 

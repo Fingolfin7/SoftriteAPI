@@ -16,7 +16,9 @@
                 </label>
             </span>
 
-
+            <div class="button-row">
+                <input type="submit" class="button" value="Update">
+            </div>
         </section>
 
         <section id="cloud_backup">
@@ -26,42 +28,47 @@
             <span class="flex-row"><b>Storage Used:</b> {{ user.profile.used_storage| filesizeformat }}</span>
 
             <h5>Backup Records</h5>
-            <table>
-                <thead>
-                    <tr>
-                        <th>File Name</th>
-                        <th>Size</th>
-                        <th>Uploaded</th>
-                        <th>Download</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for backup in user.backup_set.all %}
+            {% if backups %}
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ backup.basename }}</td>
-                            <td>{{ backup.filesize|filesizeformat }}</td>
-                            <td>{{ backup.date_uploaded }}</td>
-                            <td>
-                                <a class="plain-link" href="{{ backup.file.url }}">
-                                    <i class="material-icons">download</i>
-                                </a>
-                            </td>
-                            <td>
-                                <a class="plain-link" href="#">
-                                    <i class="material-icons">delete</i>
-                                </a>
-                            </td>
+                            <th>File Name</th>
+                            <th>Size</th>
+                            <th>Uploaded</th>
+                            <th>Download</th>
+                            <th>Delete</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for backup in backups %}
+                            <tr>
+                                <td>{{ backup.basename }}</td>
+                                <td>{{ backup.filesize|filesizeformat }}</td>
+                                <td>{{ backup.date_uploaded }}</td>
+                                <td>
+                                    <a class="plain-link" href="{{ backup.file.url }}">
+                                        <i class="material-icons">download</i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
+                                        <i class="material-icons">delete</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="button-row">
+                    <a href="#">
+                        <button type="button">View All</button>
+                    </a>
+                </div>
+            {% else %}
+                <p>No backups found</p>
+            {% endif %}
         </section>
-
-
-        <div class="button-row">
-            <input type="submit" class="button" value="Update">
-        </div>
 
     </form>
 

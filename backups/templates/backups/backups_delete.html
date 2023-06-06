@@ -1,0 +1,29 @@
+{% extends 'backups/base.html' %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>
+            Are you sure you want to delete this backup?
+            <br>
+            This action cannot be undone.
+        </p>
+        <span class="flex-row">
+            Backup: <b>{{ backup.basename }} ({{ backup.filesize|filesizeformat }})</b>
+        </span>
+        <span class="flex-row">
+            Created: <b>{{ backup.date_uploaded }}</b>
+        </span>
+        <span class="button-row-left">
+            <button type="submit">
+                <i class="material-icons">delete</i>
+                Delete
+            </button>
+            <a class="plain-link" href="{% url 'profile' %}">
+                <button type="button">
+                    <i class="material-icons">cancel</i>
+                    Cancel
+                </button>
+            </a>
+        </span>
+    </form>
+{% endblock %}

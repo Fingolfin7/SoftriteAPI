@@ -74,7 +74,7 @@ def download_rbz_pdf_binary():
                     return os.path.abspath("rbz.pdf")
 
         except Exception as e:
-            logger.info("Attempt {} failed with error: {}".format(i + 1, e))
+            logger.error("Attempt {} failed with error: {}".format(i + 1, e))
             continue
 
     return False
