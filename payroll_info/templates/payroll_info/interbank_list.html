@@ -1,7 +1,20 @@
 {% extends 'payroll_info/base.html' %}
 {% block content %}
+    <section id="search">
+        <form method="GET">
+            {% csrf_token %}
+            <span class="flex-row">
+                {{ search_form.as_p }}
+                <button type="submit" class="plain-button">
+                    <i class="material-icons">search</i>
+                </button>
+            </span>
+        </form>
+    </section>
+
+    <br>
+
     <section id="interbank-rates-list">
-        {% csrf_token %}
         {% if inter_rates %}
             <table>
                 <thead>

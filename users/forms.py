@@ -5,19 +5,20 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, User
 
 
 class UserRegisterForm(UserCreationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}), label="")
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'width-100'}),
+                               label="")
 
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email'}),
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'width-100'}),
                              label="")
 
     password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password',
-                                          'autocomplete': 'on'}),
+                                          'autocomplete': 'on', 'class': 'width-100'}),
         label=""
     )
     password2 = forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password',
-                                          'autocomplete': 'on'}),
+                                          'autocomplete': 'on', 'class': 'width-100'}),
         label=""
     )
 
@@ -29,10 +30,10 @@ class UserRegisterForm(UserCreationForm):
 
 
 class UserLoginForm(AuthenticationForm):
-    username = UsernameField(widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+    username = UsernameField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'width-100'}),
                              label="")
     password = forms.CharField(widget=forms.PasswordInput(
-        attrs={'placeholder': 'Enter Password', 'autocomplete': 'on'}),
+        attrs={'placeholder': 'Enter Password', 'autocomplete': 'on', 'class': 'width-100'}),
         label="")
 
 

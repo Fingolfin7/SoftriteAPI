@@ -1,16 +1,13 @@
-from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.urls import reverse
-from .models import *
 from .forms import *
-import os
 from .scrapers.rbz_rate import download_rbz_pdf_binary, get_rbz_rate
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import logging
 
 logger = logging.getLogger(__name__)
@@ -182,7 +179,7 @@ def get_all_nec_grades(request, **kwargs):
             grades_list.append({
                 'nec': nec.name,
                 'grade': grade.grade,
-                'USD Min': grade.usd_minimum,
+                'usd_min': grade.usd_minimum,
             })
 
         if not grades_list:
@@ -203,7 +200,7 @@ def get_nec_grade(request, **kwargs):
             {
                 'nec': nec.name,
                 'grade': grade.grade,
-                'USD Min': grade.usd_minimum,
+                'usd_min': grade.usd_minimum,
             }
         )
     except ObjectDoesNotExist:
@@ -235,7 +232,35 @@ class InterbankListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Interbank Rates'
+        context['search_form'] = InterbankSearchForm(
+            initial={
+                'start_date': self.request.GET.get('start_date'),
+                'end_date': self.request.GET.get('end_date')
+            }
+        )
+        # context['search_results'] = True \
+        #     if self.request.GET.get('start_date') or self.request.GET.get('end_date') \
+        #     else False
+
         return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+
+        if start_date and end_date and start_date <= end_date:
+            queryset = queryset.filter(date__range=[start_date, end_date])  # filter by date range.
+        # __range is a django filter
+        elif start_date and not end_date:
+            queryset = queryset.filter(date__gte=start_date)  # gte is greater than or equal to
+        elif end_date and not start_date:
+            queryset = queryset.filter(date__lte=end_date)  # lte is less than or equal to
+        else:
+            queryset = queryset.all()  # return all the queryset if no date is specified
+
+        return queryset
 
 
 class InterbankCreateView(LoginRequiredMixin, CreateView):
