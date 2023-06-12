@@ -38,7 +38,6 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UpdateProfileForm(forms.ModelForm):
-
     class Meta:
         model = Profile
         fields = ['image']
@@ -47,5 +46,3 @@ class UpdateProfileForm(forms.ModelForm):
         }
         help_texts = {k: "" for k in fields}
         labels = {k: "" for k in fields}
-
-

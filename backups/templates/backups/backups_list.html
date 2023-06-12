@@ -1,4 +1,4 @@
-{% extends 'payroll_info/base.html' %}
+{% extends 'backups/base.html' %}
 
 <!-- add this line to include the custom tag we made in the param_replace.py file -->
 {% load param_replace %}
@@ -18,38 +18,38 @@
 
     <br>
 
-    <section id="interbank-rates-list">
-        {% if inter_rates %}
+    <section id="backups-list">
+        {% if backups %}
             <table>
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>USD-ZWL Rate</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </tr>
+                   <tr>
+                       <th>File Name</th>
+                       <th>Size</th>
+                       <th>Uploaded</th>
+                       <th>Download</th>
+                       <th>Delete</th>
+                   </tr>
                 </thead>
-                {% for obj in inter_rates %}
-                    <tr>
-                        <td>{{ obj.date }}
-                        <td>{{ obj.rate }}</td>
-                        <td>
-                            <a class="plain-link" href="{% url 'interbank-update' obj.id %}">
-                                <i class="material-icons">edit</i>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="plain-link" href="{% url 'interbank-delete' obj.id %}">
-                                <i class="material-icons">remove_circle</i>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
+                {% for backup in backups %}
+                            <tr>
+                                <td>{{ backup.basename }}</td>
+                                <td>{{ backup.filesize|filesizeformat }}</td>
+                                <td>{{ backup.date_uploaded }}</td>
+                                <td>
+                                    <a class="plain-link" href="{{ backup.file.url }}">
+                                        <i class="material-icons">download</i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
+                                        <i class="material-icons">delete</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
             </table>
-         {% else %}
-            <p>
-               No interbank rates have been added yet.
-            </p>
+        {% else %}
+            <p>No backups found.</p>
         {% endif %}
     </section>
 
@@ -88,13 +88,6 @@
     {% endif %}
 
     <span class="button-row-left">
-        <a class="plain-link" href="{% url 'interbank-add' %} ">
-            <button type="button">
-                <i class="material-icons">add</i>
-                Rate
-            </button>
-        </a>
-
         <a class="plain-link" href="{% url 'payroll-home' %}">
             <button type="button">
                 <i class="material-icons">arrow_back</i>

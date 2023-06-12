@@ -11,10 +11,7 @@ def param_replace(context, **kwargs):
     """
     The param_replace function gets the current URL context from the request object in the context dictionary. It then
     gets the keyword arguments passed to it and combines them with the current URL parameters using the copy() method.
-    Finally, it returns a URL-encoded string of the updated parameters.The param_replace function gets the current URL
-    context from the request object in the context dictionary. It then gets the keyword arguments passed to it and
-    combines them with the current URL parameters using the copy() method. Finally, it returns a URL-encoded string of
-    the updated parameters.
+    Finally, it returns a URL-encoded string of the updated parameters.
     """
     d = context['request'].GET.copy()
     for k, v in kwargs.items():

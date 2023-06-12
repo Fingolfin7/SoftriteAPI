@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm, UpdateProfileForm, UserLoginForm
+from .forms import *
+from django.views.generic import ListView
 from backups.models import Backup
 from django.contrib import messages
 
@@ -50,4 +51,3 @@ def profile(request):
     return render(request, 'users/profile.html', {'profile_form': profile_form,
                                                   'title': 'Profile',
                                                   'backups': backups})
-

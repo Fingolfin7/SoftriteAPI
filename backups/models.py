@@ -29,7 +29,7 @@ class Backup(models.Model):
     filesize = models.IntegerField()  # store the filesize in bytes
 
     def __str__(self):
-        return f"{self.user.username} Backup on {self.date_uploaded.strftime('%d/%m/%Y at %H:%M')}"
+        return f"{self.user.username} Backup on {self.date_uploaded.strftime('%m/%d/%Y at %H:%M')}"
 
     @property
     def basename(self):
@@ -54,8 +54,8 @@ class Backup(models.Model):
 
         user_profile.save()
 
-        # this ended up being unnecessary because I'm using django-cleanup to delete files
-        # when the model is deleted automatically
+        # this ended up being unnecessary because I'm using django-cleanup to automatically delete files
+        # when the model is deleted
         """# check if file exists before deleting
         if hasattr(self.file, 'storage') and self.file.storage.exists(self.file.name):
             self.file.delete()"""

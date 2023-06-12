@@ -1,17 +1,12 @@
 import os
-from datetime import datetime
-
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
-
 from .models import Backup
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseBadRequest
+from .forms import *
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User
 
 
@@ -54,7 +49,7 @@ def upload(request):
             if user is None:
                 return HttpResponse("Invalid credentials", status=401)
 
-            saveDir = os.path.join('backups', user.username)
+            saveDir = os.path.join('media/backups/', user.username)
             if not os.path.exists(saveDir):
                 os.makedirs(saveDir)  # makedirs creates all the directories in the path if they don't exist
             savePath = os.path.join(saveDir, file.name)
@@ -100,4 +95,37 @@ class BackupDeleteView(LoginRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Delete Backup"
         return context
+
+
+class BackupListView(LoginRequiredMixin, ListView):
+    model = Backup
+    template_name = 'backups/backups_list.html'
+    context_object_name = 'backups'
+    ordering = ['-date_uploaded']
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Profile'
+        context['search_form'] = BackupSearch(initial={'start_date': self.request.GET.get('start_date'),
+                                                       'end_date': self.request.GET.get('end_date'),
+                                                       'name': self.request.GET.get('name')})
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        name = self.request.GET.get('name')
+        if start_date and end_date and start_date <= end_date:
+            queryset = queryset.filter(date_uploaded__range=[start_date, end_date])  # filter by date range.
+            # __range is a django filter
+        elif start_date and not end_date:
+            queryset = queryset.filter(date_uploaded__gte=start_date)  # gte is greater than or equal to
+        elif end_date and not start_date:
+            queryset = queryset.filter(date_uploaded__lte=end_date)  # lte is less than or equal to
+        if name:
+            queryset = queryset.filter(file__icontains=name)
+        # only show backups uploaded by the user
+        return queryset.filter(user=self.request.user)
 
