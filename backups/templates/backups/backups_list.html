@@ -31,22 +31,22 @@
                    </tr>
                 </thead>
                 {% for backup in backups %}
-                            <tr>
-                                <td>{{ backup.basename }}</td>
-                                <td>{{ backup.filesize|filesizeformat }}</td>
-                                <td>{{ backup.date_uploaded }}</td>
-                                <td>
-                                    <a class="plain-link" href="{{ backup.file.url }}">
-                                        <i class="material-icons">download</i>
-                                    </a>
-                                </td>
-                                <td>
-                                    <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
-                                        <i class="material-icons">delete</i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
+                    <tr>
+                        <td>{{ backup.basename }}</td>
+                        <td>{{ backup.filesize|filesizeformat }}</td>
+                        <td>{{ backup.date_uploaded }}</td>
+                        <td>
+                            <a class="plain-link" href="{{ backup.file.url }}">
+                                <i class="material-icons">download</i>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
+                                <i class="material-icons">delete</i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
             </table>
         {% else %}
             <p>No backups found.</p>

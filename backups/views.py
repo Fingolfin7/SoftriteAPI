@@ -1,5 +1,7 @@
 import os
 from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .models import Backup
 from .forms import *
@@ -97,6 +99,33 @@ class BackupDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
+@login_required
+def admin_backups_page(request):
+    all_users = User.objects.all()
+    context = {
+        'all_users': all_users,
+        'title': 'Admin Backups',
+    }
+    return render(request, 'backups/backups_admin.html', context)
+
+
+@login_required
+def admin_backups_user_page(request, username):
+    """
+    View for the admin backups page. This page lists all the backups for a given user.
+    The username is passed in as an argument.
+    """
+    user = User.objects.get(username=username)
+    backups = Backup.objects.filter(user=user).order_by('-date_uploaded')
+
+    context = {
+        'backups': backups,
+        'title': 'Admin Backups',
+        'user': user,
+    }
+    return render(request, 'backups/backups_admin_user.html', context)
+
+
 class BackupListView(LoginRequiredMixin, ListView):
     model = Backup
     template_name = 'backups/backups_list.html'
@@ -128,4 +157,3 @@ class BackupListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(file__icontains=name)
         # only show backups uploaded by the user
         return queryset.filter(user=self.request.user)
-
