@@ -179,10 +179,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # load the static dirs from the different apps
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
     os.path.join(BASE_DIR, 'payroll_info/static'),
     os.path.join(BASE_DIR, 'users/static'),
-    # os.path.join(BASE_DIR, 'backups/static'),
+    # os.path.join(BASE_DIR, 'backups/static'),s
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
