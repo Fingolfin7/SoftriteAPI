@@ -1,9 +1,7 @@
-import os
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from .models import Backup
 from .forms import *
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -12,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 
 
-def convert_size(size_bytes: int) -> str:
+def convert_size(size_bytes: int | bytes) -> str:
     """ Takes a file size in bytes and returns a string with the appropriate unit.
     E.g. 1024 bytes -> 1 KB  or 1024 MB -> 1 GB
     """
@@ -51,9 +49,11 @@ def upload(request):
             if user is None:
                 return HttpResponse("Invalid credentials", status=401)
 
-            saveDir = os.path.join('media/backups/', user.username)
+            saveDir = os.path.join('backups/', user.username)
+            """
             if not os.path.exists(saveDir):
                 os.makedirs(saveDir)  # makedirs creates all the directories in the path if they don't exist
+            """
             savePath = os.path.join(saveDir, file.name)
 
             storage_left = user.profile.max_storage - user.profile.used_storage
@@ -64,7 +64,7 @@ def upload(request):
 
             if backup.filesize > (user.profile.max_storage - user.profile.used_storage):
                 response_str = f"Could not upload file {backup.basename}. " \
-                               f"You cannot exceeded your storage limit of {convert_size(user.profile.max_storage)}. "\
+                               f"You cannot exceeded your storage limit of {convert_size(user.profile.max_storage)}. " \
                                f"Storage left: {convert_size(storage_left)}, " \
                                f"upload size: {convert_size(backup.filesize)}"
                 backup.delete()
