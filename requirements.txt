@@ -10,3 +10,4 @@ apscheduler~=3.10.1
 django-cleanup
 pytz~=2023.3
 urllib3~=1.26.15
+drf-chunked-upload
