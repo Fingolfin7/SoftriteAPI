@@ -8,21 +8,9 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from SoftriteAPI.settings import MEDIA_ROOT, DATA_UPLOAD_MAX_MEMORY_SIZE
+from SoftriteAPI.settings import MEDIA_ROOT
 from django.utils.crypto import get_random_string
-import hashlib
-
-
-def convert_size(size_bytes: int | bytes) -> str:
-    """ Takes a file size in bytes and returns a string with the appropriate unit.
-    E.g. 1024 bytes -> 1 KB  or 1024 MB -> 1 GB
-    """
-    if size_bytes == 0:
-        return '0 bytes'
-    for unit in ['bytes', 'KB', 'MB', 'GB', 'TB']:
-        if size_bytes < 1024:
-            return f'{size_bytes:.2f} {unit}'
-        size_bytes /= 1024
+from utils import *
 
 
 @csrf_exempt
@@ -89,12 +77,15 @@ def upload(request):
         return HttpResponse("GET requests not allowed for this endpoint. Please use a POST request to upload files.")
 
 
-def calculate_checksum(filepath: str):
-    hasher = hashlib.md5()
-    with open(filepath, "rb") as file:
-        for chunk in iter(lambda: file.read(4096), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
+def delete_chunks(uploader_id: str):
+    """
+    Delete all chunks for a given uploader ID.
+    """
+    destination = os.path.join(MEDIA_ROOT, 'uploads')
+    for file in os.listdir(destination):
+        if file.startswith(uploader_id):
+            print(f"Deleting {file}")
+            os.remove(os.path.join(destination, file))
 
 
 def handle_chunked_upload(request):
@@ -134,19 +125,24 @@ def handle_chunked_upload(request):
         user = authenticate(request, username=username, password=password)
 
         if user is None:
+            delete_chunks(uploader_id)
             return HttpResponse("Invalid credentials", status=401)
 
         saveDir = os.path.join('backups/', user.username)
         final_filename = f"{filename}"
         final_file_path = os.path.join(saveDir, final_filename)
         final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
+        final_file_path = get_available_name(final_file_path)
+
+        if not os.path.exists(os.path.dirname(final_file_path)):
+            os.makedirs(final_file_path)
 
         # check file type before saving. only allow .zip files
         if not final_file_path.endswith('.zip'):
+            delete_chunks(uploader_id)
             return HttpResponse("Invalid file type. Only .zip files are allowed.", status=415)
 
         with open(final_file_path, 'wb') as final_file:
-            print("path exists: ", os.path.exists(final_file_path), "path: ", final_file_path)
             for i in range(total_chunks):
                 chunk_filename = f"{uploader_id}_chunk_{i}.part"
                 chunk_path = os.path.join(destination, chunk_filename)
@@ -174,10 +170,12 @@ def handle_chunked_upload(request):
                            f"Storage left: {convert_size(storage_left)}, " \
                            f"upload size: {convert_size(backup.filesize)}"
             backup.delete()
+            delete_chunks(uploader_id)
             return HttpResponse(response_str, status=413)
 
         response = HttpResponse("File uploaded successfully", status=200)
         response.set_cookie('uploader_id', uploader_id)
+        print(response.content)
         return response
 
     else:
