@@ -1,6 +1,7 @@
 import os
 import hashlib
 from datetime import datetime
+from SoftriteAPI.settings import MEDIA_ROOT
 
 
 def convert_size(size_bytes: int | bytes) -> str:
@@ -29,3 +30,15 @@ def get_available_name(name: str) -> str:
         name, ext = os.path.splitext(name)
         return f"{name} at {now.strftime('%H.%M.%S')}{ext}"
     return name
+
+
+def cleanup_incomplete_uploads():
+    destination = os.path.join(MEDIA_ROOT, 'uploads')
+    for file in os.listdir(destination):
+        file_path = os.path.join(destination, file)
+        # check if file is older than 1 day
+        if os.stat(file_path).st_mtime < datetime.now().timestamp() - 86400:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
+# Schedule the cleanup function to run periodically (e.g., every hour)

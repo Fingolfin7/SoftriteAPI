@@ -8,9 +8,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from SoftriteAPI.settings import MEDIA_ROOT
 from django.utils.crypto import get_random_string
-from utils import *
+from backups.utils import *
 
 
 @csrf_exempt
