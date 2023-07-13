@@ -135,7 +135,7 @@ def handle_chunked_upload(request):
         final_file_path = get_available_name(final_file_path)
 
         if not os.path.exists(os.path.dirname(final_file_path)):
-            os.makedirs(final_file_path)
+            os.makedirs(os.path.dirname(final_file_path))
 
         # check file type before saving. only allow .zip files
         if not final_file_path.endswith('.zip'):
