@@ -12,70 +12,6 @@ from django.utils.crypto import get_random_string
 from backups.utils import *
 
 
-@csrf_exempt
-def upload(request):
-    """
-    View for uploading a backup file from Adaski via http.
-    This view takes a POST request with a file and saves it to the server's filesystem.
-    Each backup file is saved with a unique name based on the user's/company's profile name and
-    the date and time of upload. A backup record is also created in the database.
-    """
-
-    if request.method == 'POST':
-        try:
-            # Check if it's a chunked upload
-            total_chunks = request.POST.get('total_chunks')
-            if total_chunks:
-                return handle_chunked_upload(request)
-
-            file = request.FILES['file']
-
-            # check file type before saving. only allow .zip files
-            if not file.name.endswith('.zip'):
-                return HttpResponse("Invalid file type. Only .zip files are allowed.", status=415)
-
-            # get the user credentials from the request
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-
-            # authenticate the user
-            user = authenticate(request, username=username, password=password)
-
-            if user is None:
-                return HttpResponse("Invalid credentials", status=401)
-
-            saveDir = os.path.join('backups/', user.username)
-            """
-            if not os.path.exists(saveDir):
-                os.makedirs(saveDir)  # makedirs creates all the directories in the path if they don't exist
-            """
-            savePath = os.path.join(saveDir, file.name)
-
-            storage_left = user.profile.max_storage - user.profile.used_storage
-
-            backup = Backup(user=user, file=file)
-            backup.file.name = savePath
-            backup.save()
-
-            if backup.filesize > (user.profile.max_storage - user.profile.used_storage):
-                response_str = f"Could not upload file {backup.basename}. " \
-                               f"You cannot exceeded your storage limit of {convert_size(user.profile.max_storage)}. " \
-                               f"Storage left: {convert_size(storage_left)}, " \
-                               f"upload size: {convert_size(backup.filesize)}"
-                backup.delete()
-                return HttpResponse(response_str, status=413)
-
-            else:
-                return HttpResponse("File uploaded successfully", status=200)
-        except Exception as e:
-            print(f"Error: {e}")
-            return HttpResponse(f"Error: {e}")
-
-    else:
-        # return an error message
-        return HttpResponse("GET requests not allowed for this endpoint. Please use a POST request to upload files.")
-
-
 def delete_chunks(uploader_id: str):
     """
     Delete all chunks for a given uploader ID.
@@ -87,100 +23,109 @@ def delete_chunks(uploader_id: str):
             os.remove(os.path.join(destination, file))
 
 
-def handle_chunked_upload(request):
+@csrf_exempt
+def upload(request):
     """
     Handle the chunked upload process for chunked file uploads.
     """
+    if not request.method == 'POST':
+        return HttpResponse("Only POST requests are allowed", status=405)
 
+    # Get or set the uploader ID cookie
     uploader_id = request.COOKIES.get('uploader_id')
     if not uploader_id or uploader_id is None:
         uploader_id = get_random_string(length=32)
         request.COOKIES['uploader_id'] = uploader_id
 
+    # Get the chunk index, total number of chunks, and chunk data
     total_chunks = int(request.POST.get('total_chunks'))
     chunk_index = int(request.POST.get('chunk_index'))
     file_data = request.FILES.get('file')
 
-    # Retrieve metadata from the request
-    filename = request.POST.get('filename')
-    checksum = request.POST.get('checksum')
+    # Authenticate the user
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    user = authenticate(request, username=username, password=password)
 
-    # Define the destination directory where the file chunks will be saved
-    destination = os.path.join(MEDIA_ROOT, 'uploads')
+    if user is None:
+        delete_chunks(uploader_id)
+        return HttpResponse("Invalid credentials", status=401)
 
-    # Create a FileSystemStorage instance and set the destination directory
-    fs = FileSystemStorage(location=destination)
+    try:
+        # Define the destination directory where the file chunks will be saved
+        destination = os.path.join(MEDIA_ROOT, 'uploads')
 
-    # Create a temporary file name using the session ID, original file name, and chunk index
-    tmp_filename = f"{uploader_id}_chunk_{chunk_index}.part"
+        # Create a FileSystemStorage instance and set the destination directory
+        fs = FileSystemStorage(location=destination)
 
-    # Save the chunk to the temporary file
-    fs.save(tmp_filename, file_data)
+        # Create a temporary file name using the session ID, original file name, and chunk index
+        tmp_filename = f"{uploader_id}_chunk_{chunk_index}.part"
 
-    # Check if all chunks have been received
-    if chunk_index == total_chunks - 1:
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        # Save the chunk to the temporary file
+        fs.save(tmp_filename, file_data)
 
-        if user is None:
-            delete_chunks(uploader_id)
-            return HttpResponse("Invalid credentials", status=401)
+        # Check if all chunks have been received
+        if chunk_index == total_chunks - 1:
+            filename = request.POST.get('filename')
+            checksum = request.POST.get('checksum')
 
-        saveDir = os.path.join('backups/', user.username)
-        final_filename = f"{filename}"
-        final_file_path = os.path.join(saveDir, final_filename)
-        final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
-        final_file_path = get_available_name(final_file_path)
+            saveDir = os.path.join('backups/', user.username)
+            final_filename = f"{filename}"
+            final_file_path = os.path.join(saveDir, final_filename)
+            final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
+            final_file_path = get_available_name(final_file_path)
 
-        if not os.path.exists(os.path.dirname(final_file_path)):
-            os.makedirs(os.path.dirname(final_file_path))
+            if not os.path.exists(os.path.dirname(final_file_path)):
+                os.makedirs(os.path.dirname(final_file_path))
 
-        # check file type before saving. only allow .zip files
-        if not final_file_path.endswith('.zip'):
-            delete_chunks(uploader_id)
-            return HttpResponse("Invalid file type. Only .zip files are allowed.", status=415)
+            if not final_file_path.endswith('.zip'):
+                delete_chunks(uploader_id)
+                return HttpResponse("Invalid file type. Only .zip files are allowed.", status=415)
 
-        with open(final_file_path, 'wb') as final_file:
-            for i in range(total_chunks):
-                chunk_filename = f"{uploader_id}_chunk_{i}.part"
-                chunk_path = os.path.join(destination, chunk_filename)
+            with open(final_file_path, 'wb') as final_file:
+                for i in range(total_chunks):
+                    chunk_filename = f"{uploader_id}_chunk_{i}.part"
+                    chunk_path = os.path.join(destination, chunk_filename)
 
-                with open(chunk_path, 'rb') as chunk:
-                    final_file.write(chunk.read())
+                    with open(chunk_path, 'rb') as chunk:
+                        final_file.write(chunk.read())
 
-                # Delete the temporary chunk file
-                fs.delete(chunk_path)
+                    # Delete the temporary chunk file
+                    fs.delete(chunk_path)
 
-        storage_left = user.profile.max_storage - user.profile.used_storage
+            storage_left = user.profile.max_storage - user.profile.used_storage
 
-        backup = Backup(user=user, file=final_file_path)
-        backup.save()
+            backup = Backup(user=user, file=final_file_path)
+            backup.save()
 
-        # Verify checksum if provided
-        calculated_checksum = calculate_checksum(final_file_path)
-        if checksum and checksum != calculated_checksum:
-            backup.delete()  # Delete the backup  AND  the backup file if the checksums don't match
-            return HttpResponse("Invalid checksum", status=400)
+            # Verify checksum if provided
+            calculated_checksum = calculate_checksum(final_file_path)
+            if checksum and checksum != calculated_checksum:
+                backup.delete()  # Delete the backup  AND  the backup file if the checksums don't match
+                return HttpResponse("Invalid checksum", status=400)
 
-        if backup.filesize > (user.profile.max_storage - user.profile.used_storage):
-            response_str = f"Could not upload file {backup.basename}. " \
-                           f"You cannot exceeded your storage limit of {convert_size(user.profile.max_storage)}. " \
-                           f"Storage left: {convert_size(storage_left)}, " \
-                           f"upload size: {convert_size(backup.filesize)}"
-            backup.delete()
-            delete_chunks(uploader_id)
-            return HttpResponse(response_str, status=413)
+            if backup.filesize > (user.profile.max_storage - user.profile.used_storage):
+                response_str = f"Could not upload file {backup.basename}. " \
+                               f"You cannot exceeded your storage limit of {convert_size(user.profile.max_storage)}. " \
+                               f"Storage left: {convert_size(storage_left)}, " \
+                               f"upload size: {convert_size(backup.filesize)}"
+                backup.delete()
+                delete_chunks(uploader_id)
+                return HttpResponse(response_str, status=413)
 
-        response = HttpResponse("File uploaded successfully", status=200)
-        response.set_cookie('uploader_id', uploader_id)
-        print(response.content)
-        return response
+            response = HttpResponse("File uploaded successfully", status=200)
+            response.set_cookie('uploader_id', uploader_id)
+            print(response.content)
+            return response
 
-    else:
-        response = HttpResponse("Chunk uploaded successfully", status=200)
-        response.set_cookie('uploader_id', uploader_id)
-        return response
+        else:
+            response = HttpResponse("Chunk uploaded successfully", status=200)
+            response.set_cookie('uploader_id', uploader_id)
+            return response
+    except Exception as e:
+        delete_chunks(uploader_id)
+        print(f'Error: {e}')
+        return HttpResponse(f"Server error: {e}", status=500)
 
 
 class BackupDeleteView(LoginRequiredMixin, DeleteView):
