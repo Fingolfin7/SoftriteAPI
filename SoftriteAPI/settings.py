@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import logging.handlers
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -117,6 +118,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # loggers
+LOGS_DIR = os.path.join(BASE_DIR, "Logs")  # Specify the directory path where log files will be stored
+
+# Create the Logs directory if it doesn't exist
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
 
 LOGGING = {
     "version": 1,
@@ -124,26 +130,30 @@ LOGGING = {
     "formatters": {
         "verbose": {
             "format": "[%(asctime)s] [%(levelname)s] [%(module)s] %(message)s",
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'apscheduler': {
-            'format': '[%(asctime)s] [%(levelname)s] [%(module)s] %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        }
+        "apscheduler": {
+            "format": "[%(asctime)s] [%(levelname)s] [%(module)s] %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
     },
     "handlers": {
         "file": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "info.log",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join(LOGS_DIR, "info.log"),
+            "when": "W0",  # Rotate every week on Sunday
+            "backupCount": 5,  # Maximum number of backup files to keep
             "formatter": "verbose",
         },
         "apscheduler_file": {
             "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "apscheduler.log",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join(LOGS_DIR, "apscheduler.log"),
+            "when": "W0",  # Rotate every week on Sunday
+            "backupCount": 5,  # Maximum number of backup files to keep
             "formatter": "apscheduler",
-        }
+        },
     },
     "loggers": {
         "": {
@@ -151,11 +161,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
-        'apscheduler': {
-            'handlers': ['apscheduler_file'],
-            'level': 'INFO',
-            'propagate': False
-        }
+        "apscheduler": {
+            "handlers": ["apscheduler_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 

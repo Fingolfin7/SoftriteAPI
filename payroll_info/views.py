@@ -10,11 +10,9 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 
 logger = logging.getLogger(__name__)
-sndLogger = logging.getLogger('apscheduler')
 
 
 def update_rbz_rate():
-    sndLogger.info("Called update_rbz_rate")
     # if the rate for today is not in the database, then download the pdf and get the rate,
     # else get the rate from the database
     if not InterbankUSDRate.objects.filter(date=datetime.today()).exists():
@@ -68,40 +66,80 @@ def get_rate_on(request, **kwargs):
         return HttpResponseNotFound("No rate found for this date")
 
 
-# api endpoint to get all the rates so far
-def get_all_rates(request):
-    rates = InterbankUSDRate.objects.all().order_by('-date')
-    rates_list = []
+def get_rates_between(request, **kwargs):
+    """
+        Endpoint to get the rate between two dates.
+        :param request: request object
+        :param kwargs: start_date and end_date
+    """
+    try:
+        start_date = datetime.strptime(str(kwargs['start_date']), '%m-%d-%Y')
+        end_date = datetime.strptime(str(kwargs['end_date']), '%m-%d-%Y')
+        rates = InterbankUSDRate.objects.filter(date__range=[start_date, end_date]).order_by('date')
+        rates_list = []
 
-    for rate in rates:
-        rates_list.append({
-            'rate': rate.rate,
-            'date': rate.date.strftime('%m-%d-%Y')
-        })
+        for rate in rates:
+            rates_list.append({
+                'rate': rate.rate,
+                'date': rate.date.strftime('%m-%d-%Y')
+            })
 
-    if not rates_list:
-        # return a 404 if no rates are found
+        if not rates_list:
+            # return a 404 if no rates are found
+            return HttpResponseNotFound("No rates found")
+
+        return JsonResponse(rates_list, safe=False)
+    # incorrect dates format exception
+    except ValueError:
+        return HttpResponse(status=400, reason="Incorrect dates format")
+    except ObjectDoesNotExist:
         return HttpResponseNotFound("No rates found")
 
-    return JsonResponse(rates_list, safe=False)
+
+def get_all_rates(request):
+    """
+        Endpoint to get all the rates so far.
+    """
+    try:
+        rates = InterbankUSDRate.objects.all().order_by('-date')
+        rates_list = []
+
+        for rate in rates:
+            rates_list.append({
+                'rate': rate.rate,
+                'date': rate.date.strftime('%m-%d-%Y')
+            })
+
+        if not rates_list:
+            # return a 404 if no rates are found
+            return HttpResponseNotFound("No rates found")
+
+        return JsonResponse(rates_list, safe=False)
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound("No rates found")
 
 
-# api endpoint to get all the necs and their ids
 def get_necs(request):
-    necs = NEC.objects.all()
-    necs_list = []
+    """
+        Endpoint to get all the necs and their ids
+    """
+    try:
+        necs = NEC.objects.all()
+        necs_list = []
 
-    for nec in necs:
-        necs_list.append({
-            'id': nec.pk,
-            'name': nec.name
-        })
+        for nec in necs:
+            necs_list.append({
+                'id': nec.pk,
+                'name': nec.name
+            })
 
-    if not necs_list:
-        # return a 404 if no necs are found
+        if not necs_list:
+            # return a 404 if no necs are found
+            return HttpResponseNotFound("No NECs found")
+
+        return JsonResponse(necs_list, safe=False)
+    except ObjectDoesNotExist:
         return HttpResponseNotFound("No NECs found")
-
-    return JsonResponse(necs_list, safe=False)
 
 
 # api endpoint to get the most recent rate for a given nec

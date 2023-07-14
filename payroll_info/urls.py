@@ -28,6 +28,8 @@ urlpatterns = [
     # api paths
     path('interbank/get_latest_rate/', views.get_latest_rate, name='get_latest_rate'),
     path('interbank/get_rate_on/<str:date>/', views.get_rate_on, name='get_rates_on'),
+    path('interbank/get_rates_between/<str:start_date>/<str:end_date>/', views.get_rates_between,
+         name='get_rates_between'),
     path('interbank/get_all_rates/', views.get_all_rates, name='get_all_rates'),
     path('nec/get_necs/', views.get_necs, name='nec_get_necs'),
     path('nec/<int:pk>/get_latest_rate/', views.get_latest_nec_rate, name='nec_get_latest_rate'),

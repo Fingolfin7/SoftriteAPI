@@ -36,9 +36,7 @@ def cleanup_incomplete_uploads():
     destination = os.path.join(MEDIA_ROOT, 'uploads')
     for file in os.listdir(destination):
         file_path = os.path.join(destination, file)
-        # check if file is older than 1 day
-        if os.stat(file_path).st_mtime < datetime.now().timestamp() - 86400:
+        # check if file is older than 12 hours old, if so, delete it
+        if os.stat(file_path).st_mtime < datetime.now().timestamp() - 43200:  # 43200 seconds = 12 hours
             if os.path.isfile(file_path):
                 os.remove(file_path)
-
-# Schedule the cleanup function to run periodically (e.g., every hour)
