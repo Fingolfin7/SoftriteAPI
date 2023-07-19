@@ -26,8 +26,13 @@
                        <th>File Name</th>
                        <th>Size</th>
                        <th>Uploaded</th>
+                        {% if user.profile.is_company_admin %}
+                            <th>Uploader</th>
+                        {% endif %}
                        <th>Download</th>
-                       <th>Delete</th>
+                        {% if user.profile.is_company_admin %}
+                            <th>Delete</th>
+                        {% endif %}
                    </tr>
                 </thead>
                 {% for backup in backups %}
@@ -35,16 +40,21 @@
                         <td>{{ backup.basename }}</td>
                         <td>{{ backup.filesize|filesizeformat }}</td>
                         <td>{{ backup.date_uploaded }}</td>
+                        {% if user.profile.is_company_admin %}
+                            <td>{{ backup.user.username }}</td>
+                        {% endif %}
                         <td>
                             <a class="plain-link" href="{{ backup.file.url }}">
                                 <i class="material-icons">download</i>
                             </a>
                         </td>
-                        <td>
-                            <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
-                                <i class="material-icons">delete</i>
-                            </a>
-                        </td>
+                        {% if user.profile.is_company_admin %}
+                            <td>
+                                <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </table>

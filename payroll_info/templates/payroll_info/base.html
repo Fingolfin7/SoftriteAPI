@@ -22,32 +22,19 @@
     </head>
 
     <body>
-        <!--<div class="container--center-middle">
-            {% if messages %}
-                {% for message in messages%}
-                    {% if message.tag == 'error'%}
-                        <div class="card cadmium-red ">class=""
-                            <b><em> {{ message }} </em></b>
-                        </div>
-                    {% elif message.tag == 'info'%}
-                        <div class="card cobalt-blue">
-                          <b><em> {{ message }} </em></b>
-                        </div>
-                    {% else %}
-                        <div class="card dodgerblue">
-                          <b><em> {{ message }} </em></b>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        </div>-->
-
         <div class="qfc-container">
             <section class="ribbon-container">
-                <a href="{% url 'payroll-home' %}">
-                    <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
-                </a>
                 {%if user.is_authenticated %}
+                    {% if user.is_staff %} {% comment %} If user is staff, then link to the interbank page {% endcomment %}
+                        <a href="{% url 'payroll-home' %}">
+                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
+                        </a>
+                    {% else %}
+                        <a href="#">
+                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
+                        </a>
+                    {% endif %}
+
                     <div>
                         <a class="plain-link plain" href="{% url 'profile' %}" style="padding-right:2.5rem;">
                             <b>{{ user.username | title }}</b>

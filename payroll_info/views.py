@@ -4,12 +4,20 @@ from django.urls import reverse
 from .forms import *
 from .scrapers.rbz_rate import download_rbz_pdf_binary, get_rbz_rate
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class StaffRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **kwargs):
+        view = super(StaffRequiredMixin, cls).as_view(**kwargs)
+        return user_passes_test(lambda u: u.is_staff or u.is_superuser)(view)
 
 
 def update_rbz_rate():
@@ -244,7 +252,7 @@ def get_nec_grade(request, **kwargs):
         return HttpResponseNotFound("No grade found")
 
 
-@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)  # check if user is staff or superuser
 def home(request):
     # update_rbz_rate()
     necs = NEC.objects.all()
@@ -259,7 +267,7 @@ def home(request):
 
 
 # list view for all the interbank rates
-class InterbankListView(LoginRequiredMixin, ListView):
+class InterbankListView(StaffRequiredMixin, ListView):
     model = InterbankUSDRate
     template_name = 'payroll_info/interbank_list.html'
     context_object_name = 'inter_rates'
@@ -300,7 +308,7 @@ class InterbankListView(LoginRequiredMixin, ListView):
         return queryset
 
 
-class InterbankCreateView(LoginRequiredMixin, CreateView):
+class InterbankCreateView(StaffRequiredMixin, CreateView):
     model = InterbankUSDRate
     template_name = 'payroll_info/interbank_page.html'
     form_class = InterbankUSDRateForm
@@ -312,7 +320,7 @@ class InterbankCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class InterbankUpdateView(LoginRequiredMixin, UpdateView):
+class InterbankUpdateView(StaffRequiredMixin, UpdateView):
     model = InterbankUSDRate
     template_name = 'payroll_info/interbank_page.html'
     form_class = InterbankUSDRateForm
@@ -324,7 +332,7 @@ class InterbankUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class InterbankDeleteView(LoginRequiredMixin, DeleteView):
+class InterbankDeleteView(StaffRequiredMixin, DeleteView):
     model = InterbankUSDRate
     template_name = 'payroll_info/interbank_delete.html'
     context_object_name = 'rate'
@@ -340,7 +348,7 @@ class InterbankDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class NecCreateView(LoginRequiredMixin, CreateView):
+class NecCreateView(StaffRequiredMixin, CreateView):
     model = NEC
     template_name = 'payroll_info/nec_page.html'
     form_class = NecForm
@@ -352,7 +360,7 @@ class NecCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class NecUpdateView(LoginRequiredMixin, UpdateView):
+class NecUpdateView(StaffRequiredMixin, UpdateView):
     model = NEC
     template_name = 'payroll_info/nec_page.html'
     form_class = NecForm
@@ -363,7 +371,7 @@ class NecUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class NecDeleteView(LoginRequiredMixin, DeleteView):
+class NecDeleteView(StaffRequiredMixin, DeleteView):
     model = NEC
     template_name = 'payroll_info/nec_delete.html'
     success_url = '/'
@@ -375,7 +383,7 @@ class NecDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class NecRatesListView(LoginRequiredMixin, ListView):
+class NecRatesListView(StaffRequiredMixin, ListView):
     model = Rates
     template_name = 'payroll_info/nec_rates_list.html'
     context_object_name = 'rates'
@@ -392,7 +400,7 @@ class NecRatesListView(LoginRequiredMixin, ListView):
         return context
 
 
-class NecRatesCreateView(LoginRequiredMixin, CreateView):
+class NecRatesCreateView(StaffRequiredMixin, CreateView):
     model = Rates
     form_class = NecRatesForm
     template_name = 'payroll_info/nec_rate_create.html'
@@ -415,7 +423,7 @@ class NecRatesCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class NecRatesUpdateView(LoginRequiredMixin, UpdateView):
+class NecRatesUpdateView(StaffRequiredMixin, UpdateView):
     model = Rates
     form_class = NecRatesForm
     template_name = 'payroll_info/nec_rate_update.html'
@@ -442,7 +450,7 @@ class NecRatesUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class NecRatesDeleteView(LoginRequiredMixin, DeleteView):
+class NecRatesDeleteView(StaffRequiredMixin, DeleteView):
     model = Rates
     context_object_name = 'rate'
     template_name = 'payroll_info/nec_rate_delete.html'
@@ -463,7 +471,7 @@ class NecRatesDeleteView(LoginRequiredMixin, DeleteView):
         return context
 
 
-class NecGradesListView(LoginRequiredMixin, ListView):
+class NecGradesListView(StaffRequiredMixin, ListView):
     model = Grades
     template_name = 'payroll_info/nec_grades_list.html'
     context_object_name = 'grades'
@@ -480,7 +488,7 @@ class NecGradesListView(LoginRequiredMixin, ListView):
         return context
 
 
-class NecGradesCreateView(LoginRequiredMixin, CreateView):
+class NecGradesCreateView(StaffRequiredMixin, CreateView):
     model = Grades
     form_class = NECGradesForm
     template_name = 'payroll_info/nec_grade_create_update.html'
@@ -503,7 +511,7 @@ class NecGradesCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class NecGradesUpdateView(LoginRequiredMixin, UpdateView):
+class NecGradesUpdateView(StaffRequiredMixin, UpdateView):
     model = Grades
     form_class = NECGradesForm
     template_name = 'payroll_info/nec_grade_create_update.html'
@@ -534,7 +542,7 @@ class NecGradesUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class NecGradesDeleteView(LoginRequiredMixin, DeleteView):
+class NecGradesDeleteView(StaffRequiredMixin, DeleteView):
     model = Grades
     context_object_name = 'grade'
     template_name = 'payroll_info/nec_grade_delete.html'

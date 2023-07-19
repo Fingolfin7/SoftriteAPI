@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile
+from .models import Profile, Company
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
 
@@ -37,12 +37,39 @@ class UserLoginForm(AuthenticationForm):
         label="")
 
 
+class CompanyCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Name'}),
+                           label="")
+    code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Code'}),
+                           label="")
+    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Address'}),
+                              label="")
+    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Phone'}),
+                            label="")
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Company Email'}),
+                             label="")
+    website = forms.URLField(widget=forms.URLInput(attrs={'placeholder': 'Company Website'}),
+                             label="")
+    logo = forms.ImageField(widget=forms.FileInput(), label="")
+
+    class Meta:
+        model = Company
+        fields = ['name', 'code', 'address', 'phone', 'email', 'website', 'logo']
+        help_texts = {k: "" for k in fields}
+        labels = {k: "" for k in fields}
+
+
 class UpdateProfileForm(forms.ModelForm):
+    image = forms.ImageField(widget=forms.FileInput())
+    firstname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}),
+                                label="")
+    lastname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}),
+                               label="")
+    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}),
+                            label="")
+
     class Meta:
         model = Profile
-        fields = ['image']
-        widgets = {
-            'image': forms.FileInput(),
-        }
+        fields = ['image', 'firstname', 'lastname', 'phone']
         help_texts = {k: "" for k in fields}
         labels = {k: "" for k in fields}
