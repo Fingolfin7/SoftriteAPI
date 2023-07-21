@@ -40,21 +40,18 @@ class Backup(models.Model):
     def save(self, *args, **kwargs):
         self.filesize = self.file.size
 
-        company = Company.objects.get(user=self.company)
-        company.used_storage += self.filesize
-        company.save()
+        self.company.used_storage += self.filesize
+        self.company.save()
 
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        company = Company.objects.get(user=self.company)
-
-        if company.used_storage >= self.filesize:
-            company.used_storage -= self.filesize
+        if self.company.used_storage >= self.filesize:
+            self.company.used_storage -= self.filesize
         else:
-            company.used_storage = 0
+            self.company.used_storage = 0
 
-        company.save()
+        self.company.save()
 
         # this ended up being unnecessary because I'm using django-cleanup to automatically delete files
         # when the model is deleted

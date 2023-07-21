@@ -5,20 +5,20 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, User
 
 
 class UserRegisterForm(UserCreationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'width-100'}),
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}),
                                label="")
 
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'width-100'}),
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email'}),
                              label="")
 
     password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password',
-                                          'autocomplete': 'on', 'class': 'width-100'}),
+                                          'autocomplete': 'on'}),
         label=""
     )
     password2 = forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password',
-                                          'autocomplete': 'on', 'class': 'width-100'}),
+                                          'autocomplete': 'on'}),
         label=""
     )
 
@@ -37,20 +37,21 @@ class UserLoginForm(AuthenticationForm):
         label="")
 
 
-class CompanyCreateForm(forms.ModelForm):
+class CompanyForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Name'}),
                            label="")
     code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Code'}),
                            label="")
-    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Address'}),
+    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Address'}), required=False,
                               label="")
-    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Phone'}),
+    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Phone'}), required=False,
                             label="")
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Company Email'}),
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Company Email'}), required=False,
                              label="")
-    website = forms.URLField(widget=forms.URLInput(attrs={'placeholder': 'Company Website'}),
+    website = forms.URLField(widget=forms.URLInput(attrs={'placeholder': 'Company Website'}), required=False,
                              label="")
-    logo = forms.ImageField(widget=forms.FileInput(), label="")
+    logo = forms.ImageField(widget=forms.FileInput(), required=False,
+                            label="")
 
     class Meta:
         model = Company
@@ -60,7 +61,9 @@ class CompanyCreateForm(forms.ModelForm):
 
 
 class UpdateProfileForm(forms.ModelForm):
-    image = forms.ImageField(widget=forms.FileInput())
+    image = forms.ImageField(widget=forms.FileInput(), required=False)
+    is_company_admin = forms.BooleanField(required=False, label="")
+    company = forms.ModelChoiceField(queryset=Company.objects.all(), required=False, label="")  # select a company from the list of all companies
     firstname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}),
                                 label="")
     lastname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}),
@@ -70,6 +73,14 @@ class UpdateProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['image', 'firstname', 'lastname', 'phone']
+        fields = ['image', 'is_company_admin', 'firstname', 'lastname', 'phone']
         help_texts = {k: "" for k in fields}
         labels = {k: "" for k in fields}
+
+
+class CompanySearchForm(forms.Form):
+    name = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Company Name'}),
+                           label="")
+    code = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Company Code'}),
+                           label="")
+

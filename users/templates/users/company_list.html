@@ -1,8 +1,6 @@
-{% extends 'backups/base.html' %}
-
-<!-- add this line to include the custom tag we made in the param_replace.py file -->
-{% load param_replace %}
-
+{% extends 'payroll_info/base.html' %}
+{% load crispy_forms_tags %}
+{% load param_replace %} {# custom tag to get pagination working properly with parameter links #}
 {% block content %}
     <section id="search">
         <form method="GET">
@@ -16,63 +14,42 @@
         </form>
     </section>
 
-    <br>
-
-    <section id="backups-list">
-        {% if company %}
-            <h5>{{ company.code }} Backup Records</h5>
-
-            <span class="flex-row">
-                <b>Total Storage: </b> {{ company.max_storage|filesizeformat }}<br>
-            </span>
-            <br/>
-            <span class="flex-row">
-                <b>Used Storage: </b> {{ company.used_storage|filesizeformat }}<br>
-            </span>
-            <br/>
-        {% endif %}
-
-        {% if backups %}
+    <section id="company_list_view">
+        {% if companies %}
             <table>
                 <thead>
-                   <tr>
-                       <th>File Name</th>
-                       <th>Size</th>
-                       <th>Uploaded</th>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <th>Uploader</th>
-                        {% endif %}
-                       <th>Download</th>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <th>Delete</th>
-                        {% endif %}
-                   </tr>
-                </thead>
-                {% for backup in backups %}
                     <tr>
-                        <td>{{ backup.basename }}</td>
-                        <td>{{ backup.filesize|filesizeformat }}</td>
-                        <td>{{ backup.date_uploaded }}</td>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <td>{{ backup.user.username }}</td>
-                        {% endif %}
+                        <th>Name</th>
+                        <th>Code</th>
+                        <th>Backups</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                {% for com in companies %}
+                    <tr>
+                        <td>{{ com.name }}</td>
+                        <td>{{ com.code }}</td>
                         <td>
-                            <a class="plain-link" href="{{ backup.file.url }}">
-                                <i class="material-icons">download</i>
+                            <a class="plain-link" href="{% url 'backups:company_list' com.id %}">
+                                <i class="material-icons">folder open</i>
                             </a>
                         </td>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <td>
-                                <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
-                                    <i class="material-icons">delete</i>
-                                </a>
-                            </td>
-                        {% endif %}
+                        <td>
+                            <a class="plain-link" href="{% url 'update_company' com.id %}">
+                                <i class="material-icons">edit</i>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="plain-link" href="{% url 'delete_company' com.id %}">
+                                <i class="material-icons">remove_circle</i>
+                            </a>
+                        </td>
                     </tr>
                 {% endfor %}
             </table>
         {% else %}
-            <p>No backups found.</p>
+            <p>No companies have been added yet</p>
         {% endif %}
     </section>
 
@@ -111,7 +88,14 @@
     {% endif %}
 
     <span class="button-row-left">
-        <a class="plain-link" href="{% url 'payroll-home' %}">
+        <a class="plain-link" href="{% url 'create_company' %} ">
+            <button type="button">
+                <i class="material-icons">add</i>
+                Add
+            </button>
+        </a>
+
+        <a class="plain-link" href="{% url 'profile' %}">
             <button type="button">
                 <i class="material-icons">arrow_back</i>
                 Back

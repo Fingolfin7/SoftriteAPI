@@ -1,0 +1,73 @@
+{% extends 'payroll_info/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <span class="section-header">Create User</span>
+        <section id="user-object-create">
+            <span class="flex-row">
+                <b>Username:</b> {{ user_form.username }}
+                {{ user_form.username.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Email:</b> {{ user_form.email }}
+                {{ user_form.email.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Password: </b> {{ user_form.password1 }}
+                {{ user_form.password1.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Confirm Password: </b> {{ user_form.password2 }}
+                {{ user_form.password2.errors }}
+            </span>
+            <br/>
+        </section>
+
+        <section id="user-object-create">
+            {% if user.is_staff %}
+                <span class="flex-row">
+                    <b>Is Company Admin: </b> {{ profile_form.is_company_admin }}
+                    {{ profile_form.is_company_admin.errors }}
+                </span>
+                <br/>
+                <span class="flex-row">
+                    <b>Company:</b> {{ profile_form.company }}
+                    {{ profile_form.company.errors }}
+                </span>
+                <br>
+            {% endif %}
+            <span class="flex-row">
+                <b>Firstname:</b> {{ profile_form.firstname }}
+                {{ profile_form.firstname.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Lastname:</b> {{ profile_form.lastname }}
+                {{ profile_form.lastname.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Phone:</b> {{ profile_form.phone }}
+                {{ profile_form.phone.errors }}
+            </span>
+            <br/>
+        </section>
+
+        <span class="button-row-left">
+            <button type="submit">
+                <i class="material-icons">add</i>
+                User
+            </button>
+            <a class="plain-link" href="{% url 'profile' %}">
+                <button type="button">
+                    <i class="material-icons">cancel</i>
+                    Cancel
+                </button>
+            </a>
+        </span>
+    </form>
+{% endblock %}

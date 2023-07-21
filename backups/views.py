@@ -69,7 +69,7 @@ def upload(request):
             filename = request.POST.get('filename')
             checksum = request.POST.get('checksum')
 
-            saveDir = os.path.join('backups/', user.username)
+            saveDir = os.path.join('backups/', user.profile.company.name)
             final_filename = f"{filename}"
             final_file_path = os.path.join(saveDir, final_filename)
             final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
@@ -93,9 +93,9 @@ def upload(request):
                     # Delete the temporary chunk file
                     fs.delete(chunk_path)
 
-            storage_left = user.profile.max_storage - user.profile.used_storage
+            storage_left = user.profile.company.max_storage - user.profile.company.used_storage
 
-            backup = Backup(user=user, file=final_file_path)
+            backup = Backup(user=user, company=user.profile.company, file=final_file_path)
             backup.save()
 
             # Verify checksum if provided
@@ -104,9 +104,9 @@ def upload(request):
                 backup.delete()  # Delete the backup  AND  the backup file if the checksums don't match
                 return HttpResponse("Invalid checksum", status=400)
 
-            if backup.filesize > (user.profile.max_storage - user.profile.used_storage):
+            if backup.filesize > (user.profile.company.max_storage - user.profile.company.used_storage):
                 response_str = f"Could not upload file {backup.basename}. " \
-                               f"You cannot exceeded your storage limit of {convert_size(user.profile.max_storage)}. " \
+                               f"You cannot exceeded your storage limit of {convert_size(user.profile.company.max_storage)}. " \
                                f"Storage left: {convert_size(storage_left)}, " \
                                f"upload size: {convert_size(backup.filesize)}"
                 backup.delete()
@@ -136,8 +136,8 @@ class BackupDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_object(self, queryset=None):
         backup = super().get_object()
-        if backup.user != self.request.user and not backup.user.is_superuser:
-            raise PermissionError("You don't have permission to delete this backup.")
+        # if backup.user != self.request.user and not backup.user.is_superuser:
+        #     raise PermissionError("You don't have permission to delete this backup.")
         return backup
 
     def get_context_data(self, **kwargs):
@@ -204,3 +204,39 @@ class BackupListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(file__icontains=name)
         # only show backups uploaded by the user
         return queryset.filter(user=self.request.user)
+
+
+class CompanyBackupListView(LoginRequiredMixin, ListView):
+    model = Backup
+    template_name = 'backups/backups_list.html'
+    context_object_name = 'backups'
+    ordering = ['-date_uploaded']
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Company Backups'
+        context['company'] = Company.objects.get(id=int(self.kwargs['company_id']))
+        context['search_form'] = BackupSearch(initial={'start_date': self.request.GET.get('start_date'),
+                                                       'end_date': self.request.GET.get('end_date'),
+                                                       'name': self.request.GET.get('name')})
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        name = self.request.GET.get('name')
+        if start_date and end_date and start_date <= end_date:
+            queryset = queryset.filter(date_uploaded__range=[start_date, end_date])  # filter by date range.
+            # __range is a django filter
+        elif start_date and not end_date:
+            queryset = queryset.filter(date_uploaded__gte=start_date)  # gte is greater than or equal to
+        elif end_date and not start_date:
+            queryset = queryset.filter(date_uploaded__lte=end_date)  # lte is less than or equal to
+        if name:
+            queryset = queryset.filter(file__icontains=name)
+        # # only show backups by company
+        # company = Company.objects.get(id=int(self.kwargs['company_id']))
+        # return queryset.filter(company=company)
+        return queryset

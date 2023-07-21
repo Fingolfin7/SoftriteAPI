@@ -30,7 +30,12 @@ urlpatterns = [
                                                 authentication_form=UserLoginForm), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('register/', user_views.register, name='register'),
-    path('', user_views.profile, name='profile')
+    path('', user_views.profile, name='profile'),
+    path('create_new_users/', user_views.create_new_users, name='create_new_users'),
+    path('create_company/', user_views.CompanyCreateView.as_view(), name='create_company'),
+    path('update_company/<int:pk>/', user_views.CompanyUpdateView.as_view(), name='update_company'),
+    path('delete_company/<int:pk>/', user_views.CompanyDeleteView.as_view(), name='delete_company'),
+    path('manage_companies/', user_views.CompanyListView.as_view(), name='manage_companies'),
 ]
 
 if settings.DEBUG:

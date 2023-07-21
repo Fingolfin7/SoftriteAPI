@@ -27,18 +27,28 @@
                 {%if user.is_authenticated %}
                     {% if user.is_staff %} {% comment %} If user is staff, then link to the interbank page {% endcomment %}
                         <a href="{% url 'payroll-home' %}">
-                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
+                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
                         </a>
                     {% else %}
                         <a href="#">
-                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
+                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
                         </a>
                     {% endif %}
 
-                    <div>
-                        <a class="plain-link plain" href="{% url 'profile' %}" style="padding-right:2.5rem;">
-                            <b>{{ user.username | title }}</b>
+                    <div class="row">
+                        <a class="plain-link plain" href="{% url 'profile' %}">
+                            <b>{{ user.username }}</b>
                         </a>
+                        {% if user.is_staff or user.profile.is_company_admin %}
+                            <a class="plain-link plain" href="{% url 'create_new_users' %}">
+                                <b>Create User</b>
+                            </a>
+                        {% endif %}
+                        {% if user.is_staff %}
+                            <a class="plain-link plain" href="{% url 'manage_companies' %}">
+                                <b>Companies</b>
+                            </a>
+                        {% endif %}
                         <a class="plain-link" href="{% url 'logout' %}">Logout</a>
                     </div>
                 {% else %}

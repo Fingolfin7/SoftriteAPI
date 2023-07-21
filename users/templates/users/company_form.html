@@ -1,0 +1,46 @@
+{% extends 'payroll_info/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <span class="section-header">{{ title }}</span>
+        <section id="CompanyInfo">
+            {% for field in form %} {# loop through all the fields. Use field.name to print the field name #}
+                {% if field.name != 'logo' %}
+                    <span class="flex-row">
+                        <b>{{ field.name | title }}:</b> {{ field }}
+                        {{ field.errors }}
+                    </span>
+                    <br/>
+                {% endif %}
+            {% endfor %}
+
+            <span class="flex-row">
+                {%  if form.logo.url  %}
+                    <img class="account-img" src="{{ form.logo.image.url }}" alt="logo">
+                {% endif %}
+
+                <label for="{{ form.logo.id_for_label }}" class="custom-file-upload">
+                    <i class="material-icons">cloud_upload</i>
+                    Upload Logo
+                    {{ form.logo }}
+                </label>
+            </span>
+        </section>
+
+        <br/>
+
+        <span class="button-row-left">
+            <button type="submit">
+                <i class="material-icons">add</i>
+                User
+            </button>
+            <a class="plain-link" href="{% url 'profile' %}">
+                <button type="button">
+                    <i class="material-icons">cancel</i>
+                    Cancel
+                </button>
+            </a>
+        </span>
+    </form>
+{% endblock %}

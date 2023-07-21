@@ -1,0 +1,19 @@
+{% extends 'payroll_info/base.html' %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p> Are you sure you want to delete <b>{{ company.name }}</b>?</p>
+        <span class="button-row-left">
+            <button type="submit">
+                <i class="material-icons">delete</i>
+                Delete
+            </button>
+            <a class="plain-link" href="{% url 'manage_companies' %}">
+                <button type="button">
+                    <i class="material-icons">cancel</i>
+                    Cancel
+                </button>
+            </a>
+        </span>
+    </form>
+{% endblock %}

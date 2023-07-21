@@ -24,9 +24,15 @@
     <body>
         <div class="qfc-container">
             <section class="ribbon-container">
-                <a href="{% url 'payroll-home' %}">
-                    <img src="{% static 'payroll_info/images/logo-transparent.png' %}" class="ribbon-logo">
-                </a>
+                {% if user.is_staff %} {% comment %} If user is staff, then link to the interbank page {% endcomment %}
+                    <a href="{% url 'payroll-home' %}">
+                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
+                    </a>
+                {% else %}
+                    <a href="#">
+                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
+                    </a>
+                {% endif %}
             </section>
 
             <section id="messages">
@@ -50,7 +56,6 @@
             </section>
 
             {% block content %}
-
             {% endblock content%}
         </div>
     </body>

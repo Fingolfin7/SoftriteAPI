@@ -31,7 +31,7 @@
                 </thead>
                 {% for obj in inter_rates %}
                     <tr>
-                        <td>{{ obj.date }}
+                        <td>{{ obj.date }}</td>
                         <td>{{ obj.rate }}</td>
                         <td>
                             <a class="plain-link" href="{% url 'interbank-update' obj.id %}">
