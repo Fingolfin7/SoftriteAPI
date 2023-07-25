@@ -194,7 +194,7 @@ class BackupListView(LoginRequiredMixin, ListView):
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         name = self.request.GET.get('name')
-        
+
         if start_date and end_date and start_date <= end_date:
             queryset = queryset.filter(date_uploaded__range=[start_date, end_date])  # filter by date range.
             # __range is a django filter
