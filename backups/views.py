@@ -190,9 +190,11 @@ class BackupListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         name = self.request.GET.get('name')
+        
         if start_date and end_date and start_date <= end_date:
             queryset = queryset.filter(date_uploaded__range=[start_date, end_date])  # filter by date range.
             # __range is a django filter
@@ -224,9 +226,11 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         name = self.request.GET.get('name')
+
         if start_date and end_date and start_date <= end_date:
             queryset = queryset.filter(date_uploaded__range=[start_date, end_date])  # filter by date range.
             # __range is a django filter
@@ -236,7 +240,5 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(date_uploaded__lte=end_date)  # lte is less than or equal to
         if name:
             queryset = queryset.filter(file__icontains=name)
-        # # only show backups by company
-        # company = Company.objects.get(id=int(self.kwargs['company_id']))
-        # return queryset.filter(company=company)
-        return queryset
+        # only show backups by company
+        return queryset.filter(company_id=int(self.kwargs['company_id']))
