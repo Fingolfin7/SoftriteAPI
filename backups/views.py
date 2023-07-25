@@ -51,6 +51,11 @@ def upload(request):
         delete_chunks(uploader_id)
         return HttpResponse("Invalid credentials", status=401)
 
+    # if the user doesn't have an associated company stop the upload
+    if not user.profile.company:
+        delete_chunks(uploader_id)
+        return HttpResponse(f"User '{user.username}' is not associated with a company.", status=401)
+
     try:
         # Define the destination directory where the file chunks will be saved
         destination = os.path.join(MEDIA_ROOT, 'uploads')
