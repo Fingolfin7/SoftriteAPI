@@ -103,7 +103,16 @@
                     {% endif %}
                 </div>
             {% else %}
-                <p>No backups found</p>
+                {% if user.profile.is_company_admin or user.is_staff and user.profile.company %}
+                    <p>No backups found for your user.</p>
+                        <div class="button-row">
+                            <a href="{% url 'backups:company_list' user.profile.company.id %}">
+                                <button type="button">{{ user.profile.company.code }} Backups</button>
+                            </a>
+                        </div>
+                {% else %}
+                    <p>No backups found</p>
+                {% endif %}
             {% endif %}
         </section>
 
