@@ -6,11 +6,11 @@ from PIL import Image
 class Company(models.Model):
     name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=10, unique=True)
-    address = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(max_length=254)
+    address = models.CharField(max_length=100, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    email = models.EmailField(max_length=254, blank=True)
     website = models.URLField(max_length=200, blank=True)
-    logo = models.ImageField(default='default.jpg', upload_to='company_logos')
+    logo = models.ImageField(default='default_logo.png', upload_to='company_logos')
 
     max_storage = models.IntegerField(default=(100 * pow(1024, 2)))  # store the max storage in bytes
     used_storage = models.IntegerField(default=0)  # store the used storage in bytes

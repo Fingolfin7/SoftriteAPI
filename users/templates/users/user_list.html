@@ -1,8 +1,6 @@
-{% extends 'backups/base.html' %}
-
-<!-- add this line to include the custom tag we made in the param_replace.py file -->
-{% load param_replace %}
-
+{% extends 'payroll_info/base.html' %}
+{% load crispy_forms_tags %}
+{% load param_replace %} {# custom tag to get pagination working properly with parameter links #}
 {% block content %}
     <section id="search">
         <form method="GET">
@@ -16,64 +14,34 @@
         </form>
     </section>
 
-    <br>
-
-    <section id="backups-list">
-        {% if company %}
-            <h5>{{ company.code }} Backup Records</h5>
-
-            <span class="flex-row">
-                <b>Total Storage: </b> {{ company.max_storage|filesizeformat }}<br>
-            </span>
-            <br/>
-            <span class="flex-row">
-                <b>Used Storage: </b> {{ company.used_storage|filesizeformat }}<br>
-            </span>
-            <br/>
-        {% endif %}
-
-        {% if backups %}
-            <table>
-                <thead>
-                   <tr>
-                       <th>File Name</th>
-                       <th>Size</th>
-                       <th>Uploaded</th>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <th>Uploader</th>
-                        {% endif %}
-                       <th>Download</th>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <th>Delete</th>
-                        {% endif %}
-                   </tr>
-                </thead>
-                {% for backup in backups %}
+    <section id="Company User Accounts">
+        <h5>Company User Accounts</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in users %}
                     <tr>
-                        <td>{{ backup.basename }}</td>
-                        <td>{{ backup.filesize|filesizeformat }}</td>
-                        <td>{{ backup.date_uploaded }}</td>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <td>{{ backup.user.username }}</td>
-                        {% endif %}
+                        <td>{{ acc.username }}</td>
+                        <td>{{ acc.profile.firstname }}</td>
+                        <td>{{ acc.profile.lastname }}</td>
+                        <td>{{ acc.email }}</td>
                         <td>
-                            <a class="plain-link" href="{{ backup.file.url }}">
-                                <i class="material-icons">download</i>
+                            <a class="plain-link" href="{% url 'delete_user' acc.id %}">
+                                <i class="material-icons">delete</i>
                             </a>
                         </td>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <td>
-                                <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
-                                    <i class="material-icons">delete</i>
-                                </a>
-                            </td>
-                        {% endif %}
                     </tr>
                 {% endfor %}
-            </table>
-        {% else %}
-            <p>No backups found.</p>
-        {% endif %}
+            </tbody>
+        </table>
     </section>
 
     {% if is_paginated %}
@@ -111,7 +79,14 @@
     {% endif %}
 
     <span class="button-row-left">
-        <a class="plain-link" href="{% url 'profile' %}">
+        <a class="plain-link" href="{% url 'create_new_users' %} ">
+            <button type="button">
+                <i class="material-icons">add</i>
+                Add
+            </button>
+        </a>
+
+        <a class="plain-link" href="{% url 'update_company' company.id %}">
             <button type="button">
                 <i class="material-icons">arrow_back</i>
                 Back

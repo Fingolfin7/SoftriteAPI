@@ -16,8 +16,8 @@
             {% endfor %}
 
             <span class="flex-row">
-                {%  if form.logo.url  %}
-                    <img class="account-img" src="{{ form.logo.image.url }}" alt="logo">
+                {%  if company.logo.url  %}
+                    <img class="logo-img" src="{{ company.logo.url }}" alt="logo">
                 {% endif %}
 
                 <label for="{{ form.logo.id_for_label }}" class="custom-file-upload">
@@ -25,15 +25,16 @@
                     Upload Logo
                     {{ form.logo }}
                 </label>
+                {{ form.logo.errors }}
             </span>
         </section>
 
         <br/>
 
-        <span class="button-row-left">
+        <span class="button-row">
             <button type="submit">
-                <i class="material-icons">add</i>
-                User
+                <i class="material-icons">save</i>
+                Save
             </button>
             <a class="plain-link" href="{% url 'profile' %}">
                 <button type="button">
@@ -42,5 +43,63 @@
                 </button>
             </a>
         </span>
+
+        <br/>
+        <section id="Company User Accounts">
+        <h5>Company User Accounts</h5>
+            {%  if company_accounts %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for acc in company_accounts %}
+                            <tr>
+                                <td>{{ acc.user.username }}</td>
+                                <td>{{ acc.firstname }}</td>
+                                <td>{{ acc.lastname }}</td>
+                                <td>{{ acc.user.email }}</td>
+                                <td>
+                                    <a class="plain-link" href="{% url 'delete_user' acc.user.id %}">
+                                        <i class="material-icons">delete</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <span class="button-row">
+                    <a class="plain-link" href="{% url 'create_new_users'%}">
+                        <button type="button">
+                            <i class="material-icons">add</i>
+                            User
+                        </button>
+                    </a>
+                    <a class="plain-link" href="{% url 'manage_company_users' company.id %}">
+                        <button type="button">
+                            <i class="material-icons">visibility</i>
+                            Users
+                        </button>
+                    </a>
+                </span>
+            {% else %}
+                <p>No users have been added to this company yet</p>
+                <span class="button-row">
+                    <a class="plain-link" href="{% url 'create_new_users'%}">
+                        <button type="button">
+                            <i class="material-icons">add</i>
+                            User
+                        </button>
+                    </a>
+                </span>
+            {% endif %}
+        </section>
     </form>
 {% endblock %}

@@ -22,22 +22,20 @@
                         <th>Name</th>
                         <th>Code</th>
                         <th>Backups</th>
-                        <th>Edit</th>
                         <th>Delete</th>
                     </tr>
                 </thead>
                 {% for com in companies %}
                     <tr>
-                        <td>{{ com.name }}</td>
+                        <td>
+                            <a class="plain-link" href="{% url 'update_company' com.id %}">
+                                {{ com.name }}
+                            </a>
+                        </td>
                         <td>{{ com.code }}</td>
                         <td>
                             <a class="plain-link" href="{% url 'backups:company_list' com.id %}">
                                 <i class="material-icons">folder open</i>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="plain-link" href="{% url 'update_company' com.id %}">
-                                <i class="material-icons">edit</i>
                             </a>
                         </td>
                         <td>

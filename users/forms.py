@@ -38,18 +38,18 @@ class UserLoginForm(AuthenticationForm):
 
 
 class CompanyForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Name'}),
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Name', 'required': False}),
                            label="")
-    code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Code'}),
+    code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Code', 'required': False}),
                            label="")
-    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Address'}), required=False,
-                              label="")
-    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Phone'}), required=False,
-                            label="")
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Company Email'}), required=False,
-                             label="")
-    website = forms.URLField(widget=forms.URLInput(attrs={'placeholder': 'Company Website'}), required=False,
-                             label="")
+    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Address', 'required': False}),
+                              required=False, label="")
+    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Phone', 'required': False}),
+                            required=False, label="")
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Company Email', 'required': False}),
+                             required=False, label="")
+    website = forms.URLField(widget=forms.URLInput(attrs={'placeholder': 'Company Website', 'required': False}),
+                             required=False, label="")
     logo = forms.ImageField(widget=forms.FileInput(), required=False,
                             label="")
 
@@ -63,12 +63,13 @@ class CompanyForm(forms.ModelForm):
 class UpdateProfileForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput(), required=False)
     is_company_admin = forms.BooleanField(required=False, label="")
-    company = forms.ModelChoiceField(queryset=Company.objects.all(), required=False, label="")  # select a company from the list of all companies
-    firstname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}),
+    company = forms.ModelChoiceField(queryset=Company.objects.all(), required=False, label="")  # select a company
+    # from the list of all companies
+    firstname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}), required=False,
                                 label="")
-    lastname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}),
+    lastname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False,
                                label="")
-    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}),
+    phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}), required=False,
                             label="")
 
     class Meta:
@@ -83,4 +84,11 @@ class CompanySearchForm(forms.Form):
                            label="")
     code = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Company Code'}),
                            label="")
+
+
+class UserSearchForm(forms.Form):
+    username = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+                               label="")
+    email = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Email'}),
+                             label="")
 

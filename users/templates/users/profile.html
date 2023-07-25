@@ -54,11 +54,6 @@
 
         <section id="cloud_backup">
             <span class="section-header">Cloud Storage</span>
-            {% if user.profile.is_company_admin or user.is_staff and user.profile.company %}
-                <span class="flex-row"><b>Total Storage:</b> {{ user.profile.company.max_storage | filesizeformat }}</span>
-                <br/>
-                <span class="flex-row"><b>Storage Used:</b> {{ user.profile.company.used_storage| filesizeformat }}</span>
-            {% endif %}
 
             <h5>Backup Records</h5>
             {% if backups %}
@@ -99,8 +94,13 @@
 
                 <div class="button-row">
                     <a href="{% url 'backups:user_list' %}">
-                        <button type="button">View All</button>
+                        <button type="button">My Backups</button>
                     </a>
+                     {% if user.profile.is_company_admin or user.is_staff and user.profile.company %}
+                        <a href="{% url 'backups:company_list' user.profile.company.id %}">
+                            <button type="button">{{ user.profile.company.code }} Backups</button>
+                        </a>
+                    {% endif %}
                 </div>
             {% else %}
                 <p>No backups found</p>
