@@ -23,8 +23,6 @@
 
     <body>
         <div class="qfc-container">
-            <div class="image image2"></div>
-            <div class="image image3"></div>
             <section class="ribbon-container">
                 {% if user.is_staff %} {% comment %} If user is staff, then link to the interbank page {% endcomment %}
                     <a href="{% url 'payroll-home' %}">

@@ -4,6 +4,9 @@
 {% block content %}
     <form  method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        <div class="image image4"></div>
+        <div class="image image2"></div>
+        <div class="image image3"></div>
         <section id="profile info">
             <span class="section-header">Update Profile</span>
 
@@ -91,6 +94,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <br/>
 
                 <div class="button-row">
                     <a href="{% url 'backups:user_list' %}">

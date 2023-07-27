@@ -4,6 +4,7 @@
 {% block content %}
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
+        <div class="image image6"></div>
         {% for error in form.non_field_errors %}
             <div>
                 {{error}}
@@ -23,13 +24,18 @@
             {% endif %}
         </div>
 
-        <div class="flex-row">
+        <br/>
+
+        <div class="button-row-left">
+            <button type="submit">
+                <i class="material-icons">add</i>
+                NEC
+            </button>
             <a href="{% url 'payroll-home' %}">
                 <button type="button">
                    Back
                 </button>
             </a>
-            <input type="Submit" value="Add">
         </div>
     </form>
 

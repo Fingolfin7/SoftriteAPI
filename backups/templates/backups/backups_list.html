@@ -4,6 +4,8 @@
 {% load param_replace %}
 
 {% block content %}
+    <div class="image image3"></div>
+    <div class="image image6"></div>
     <section id="search">
         <form method="GET">
             {% csrf_token %}
@@ -15,8 +17,6 @@
             </span>
         </form>
     </section>
-
-    <br>
 
     <section id="backups-list">
         {% if company %}

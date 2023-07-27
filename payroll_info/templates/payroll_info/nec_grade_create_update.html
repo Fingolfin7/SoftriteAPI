@@ -3,7 +3,8 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <div class="flex-row">
+        <div class="image image6"></div>
+        <div class="button-row-left">
             <button type="submit">
                 {% if title == 'New Grade' %}
                     <i class="material-icons">add</i>

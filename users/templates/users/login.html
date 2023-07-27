@@ -4,6 +4,8 @@
 {% block content %}
    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
+       <div class="image image4"></div>
+       <div class="image image1"></div>
        <span class="section-header">login</span>
 
        {{ form|crispy }}
