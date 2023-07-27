@@ -1,24 +1,71 @@
 @import url('https://fonts.googleapis.com/css?family=Titillium+Web');
 @import url("https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css");
 body {
-    --main-bg-color: white;
+    --main-bg-color: rgba(255, 255, 255, 0.2); /*e4e8f3 */
     background: var(--main-bg-color);
 }
 
 .qfc-container {
-  --form-theme-color: #2a3c90; /*#00bcd4; I changed this to match the logo*/
-  --form-bg-color: white;
+  --form-theme-color: #293E90; /*#00bcd4; I changed this to match the logo*/
+  --form-bg-color: rgba(255, 255, 255, 0.2); /*e4e8f3 */
   --input-text-color: black;
-  --button-hover: #4e5050;
-  --input-bg-gray: #E2E5E5;
+  --button-input-color: #293E90;
+  --button-hover: #4458DB;
+  --input-bg-color: #19204F;
   border: 7px solid var(--form-theme-color);
   /* border-top: 7px solid var(--form-theme-color); */
   font-size: 1em;
   font-family: "Titillium Web", sans-serif;
   background-color: var(--form-bg-color);
   padding: 35px;
-  width: 700px;
+  width: 900px;
   margin: 30px auto;
+  position: relative;
+}
+
+.qfc-container .image {
+  position: absolute;
+  padding: 5rem;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.qfc-container .image1{
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background-image: url('../images/Cartoon-01.png');
+}
+
+.qfc-container .image2{
+  z-index: -1;
+  bottom: -60px;
+  left: -60px;
+  /*top: 0;*/
+  /*right: 0;*/
+  width: 90px;
+  height: 100px;
+  background-image: url('../images/Cartoon-02.png');
+}
+
+.image3{
+  z-index: 1;
+  bottom: 0;
+  left: -225px;
+  width: 110px;
+  height: 176px;
+  background-image: url('../images/Cartoon-03.png');
+}
+
+.qfc-container .image6{
+  bottom: 0;
+  right: -55px;
+  width: 90px;
+  height: 40px;
+  background-image: url('../images/Cartoon-06.png');
 }
 
 .qfc-container ::-webkit-input-placeholder {
@@ -165,7 +212,7 @@ h6 {
   height: 2em;
   width: 4em;
   border-radius: 1.5em;
-  background-color: var(--input-bg-gray);
+  background-color: var(--input-bg-color);
   border: none;
   background-clip: padding-box;
   color: #919FAF;
@@ -292,7 +339,7 @@ select:focus {
   content: '';
   display: inline-block;
   visibility: visible;
-  border: 5px solid var(--input-bg-gray);
+  border: 5px solid var(--input-bg-color);
 }
 
 .qfc-container input[type='radio']:checked:after {
@@ -307,7 +354,7 @@ select:focus {
   content: '';
   display: inline-block;
   visibility: visible;
-  border: 5px solid var(--input-bg-gray);
+  border: 5px solid var(--input-bg-color);
 }
 
 .qfc-container textarea {
@@ -336,8 +383,8 @@ input[type='submit'] {
   height: 36px;
   border: 0;
   cursor: pointer;
-  /*background-color: var(--form-theme-color);*/
-  /*color: white;*/
+  background-color: var(--button-input-color);
+  color: white;
   -webkit-transition: all 0.3s;
   -moz-transition: all 0.3s;
   transition: all 0.3s;
@@ -357,7 +404,7 @@ input[type='submit']:hover {
   transition: all .3s;
 }
 
-@media screen and (max-width: 900px) {
+/* @media screen and (max-width: 900px) {
   .qfc-container {
       width: 70%;
   }
@@ -365,4 +412,4 @@ input[type='submit']:hover {
   select {
       width: 100%;
   }
-}
+} */

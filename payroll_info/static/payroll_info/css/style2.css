@@ -1,3 +1,8 @@
+body{
+  --button-input-color: #19204F;
+  --button-hover-color:  #4458DB;
+}
+
 /* ribbon */
 .ribbon-container-center{
   width: 100%;
@@ -9,10 +14,11 @@
 }
 
 .ribbon-container{
-  width: 100%;
+  width: inherit;
   /*padding: 0.5% 5% 0.5% 5%;*/
   margin-bottom: 2%;
   display: flex;
+  /* position: fixed; */
   justify-content: space-between;
   align-items: center;
 }
@@ -116,12 +122,16 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-  background-color: #2a3c90;
+  background-color: var(--button-input-color);
   color: white;
   font-weight: bold;
   text-align: center;
   height: 100%;
   transition: 0.3s;
+}
+
+.custom-file-upload:hover{
+  background-color: var(--button-hover-color);
 }
 
 .round-upload{
