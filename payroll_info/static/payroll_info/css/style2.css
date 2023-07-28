@@ -11,6 +11,7 @@ body{
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
 }
 
 .ribbon-container{
@@ -21,6 +22,7 @@ body{
   /* position: fixed; */
   justify-content: space-between;
   align-items: center;
+  z-index: 2;
 }
 
 .ribbon-logo-center{
@@ -230,9 +232,10 @@ body{
 }
 
 .logo-img {
-  width: 30%;
+  width: 20%;
   margin-right: 20px;
   margin-bottom: 16px;
+  /*border: thick solid var(--button-input-color);*/
 }
 
 .button-link, .plain-link{

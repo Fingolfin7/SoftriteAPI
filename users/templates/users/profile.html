@@ -7,6 +7,7 @@
         <div class="image image4"></div>
         <div class="image image2"></div>
         <div class="image image3"></div>
+        <div class="image image5"></div>
         <section id="profile info">
             <span class="section-header">Update Profile</span>
 
@@ -36,6 +37,12 @@
                     </tr>
                 </tbody>
             </table>
+            {# add the is_company_admin filed but make it hidden #}
+{#            <span style="display: none;">#}
+{#                {{ profile_form.is_company_admin }}#}
+{#            </span>#}
+{#                {{ profile_form.is_company_admin.errors }}#}
+            {# Continue with the visible fields #}
             <br/>
             <span class="flex-row">
                 <b>Firstname:</b> {{ profile_form.firstname }}

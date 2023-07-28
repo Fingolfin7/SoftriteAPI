@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import user_passes_test
 from .forms import *
@@ -55,12 +56,15 @@ def login(request):
 @login_required
 def profile(request):
     if request.method == "POST":
-        profile_form = UpdateProfileForm(request.POST, request.FILES)
+        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        profile_form.fields['is_company_admin'].disabled = True
         if profile_form.is_valid():
-            profile_form.instance = request.user.profile
+
             profile_form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile')
+        else:
+            messages.error(request, 'Error updating profile. Please try again.')
     else:
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
@@ -172,12 +176,14 @@ class CompanyCreateView(LoginRequiredMixin, CreateView):
     model = Company
     fields = ['name', 'code', 'address', 'phone', 'email', 'website', 'logo']
     template_name = 'users/company_form.html'
-    success_url = 'create_company'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Create Company'
         return context
+
+    def get_success_url(self):
+        return reverse('update_company', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):  # add success message
         messages.success(self.request, 'Company created successfully.')
@@ -189,7 +195,6 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
     fields = ['name', 'code', 'address', 'phone', 'email', 'website', 'logo']
     template_name = 'users/company_form.html'
     context_object_name = 'company'
-    success_url = 'manage_company'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -201,6 +206,9 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         return Company.objects.get(pk=self.kwargs['pk'])
 
+    def get_success_url(self):
+        return reverse('update_company', kwargs={'pk': self.object.pk})
+
     def form_valid(self, form):  # add success message
         messages.success(self.request, 'Company Information Updated.')
         return super().form_valid(form)
@@ -209,12 +217,14 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
 class CompanyDeleteView(LoginRequiredMixin, DeleteView):
     model = Company
     template_name = 'users/company_confirm_delete.html'
-    success_url = 'create_company'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Delete Company'
         return context
+
+    def get_success_url(self):
+        return reverse('manage_companies')
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Company deleted successfully.')
