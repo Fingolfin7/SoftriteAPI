@@ -221,6 +221,7 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         company = Company.objects.get(id=int(self.kwargs['company_id']))
         context['title'] = 'Company Backups'
+        context['company'] = company
         context['show_manual_backups'] = (company == self.request.user.profile.company)
         context['search_form'] = BackupSearch(initial={'start_date': self.request.GET.get('start_date'),
                                                        'end_date': self.request.GET.get('end_date'),
