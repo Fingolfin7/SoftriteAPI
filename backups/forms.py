@@ -11,3 +11,8 @@ class BackupSearch(forms.Form):
                                                                              'required': False}))
     name = forms.CharField(required=False, widget=forms.DateInput(attrs={'class': 'width-100',
                                                                          'required': False}))
+
+
+class UploadBackupForm(forms.Form):
+    # allow .zip files only
+    file = forms.FileField(required=True, widget=forms.FileInput(attrs={'id': 'backup_field', 'accept': '.zip'}))

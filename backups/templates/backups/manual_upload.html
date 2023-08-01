@@ -1,0 +1,152 @@
+{% extends 'backups/base.html' %}
+{% block content %}
+{% load static %}
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js"></script>
+    <script>
+        // Calculate the MD5 checksum of the file (using SparkMD5 library)
+        function calculateChecksum(filepath, callback) {
+            const chunkSize = 4096;
+            let offset = 0;
+            const spark = new SparkMD5.ArrayBuffer();
+            const fileReader = new FileReader();
+
+            fileReader.onload = function (event) {
+                spark.append(event.target.result); // Append chunk to the spark
+                offset += event.target.result.byteLength;
+
+                if (offset < filepath.size) {
+                    readNextChunk();
+                } else {
+                    let checksum = spark.end();
+                    callback(checksum);
+                }
+            };
+
+            function readNextChunk() {
+                let blob = filepath.slice(offset, offset + chunkSize);
+                fileReader.readAsArrayBuffer(blob);
+            }
+
+            readNextChunk();
+        }
+
+        // Function to upload the file in chunks
+        function uploadFile(filepath) {
+            const url = "{% url 'backups:upload' %}";
+            const CHUNK_SIZE = 1024 * 1024 / 4;
+            const totalChunks = Math.ceil(filepath.size / CHUNK_SIZE);
+            const progressField = document.getElementById("file_progress");
+
+            let offset = 0;
+            let chunkIndex = 0;
+            let sessionCookie = "";
+
+            function uploadNextChunk() {
+                let blob = filepath.slice(offset, offset + CHUNK_SIZE);
+                let formData = new FormData();
+
+                formData.append("file", blob);
+                formData.append("total_chunks", totalChunks);
+                formData.append("chunk_index", chunkIndex);
+
+                if (chunkIndex === totalChunks - 1) {
+                    formData.append("filename", filepath.name);
+
+                    calculateChecksum(filepath, function (checksum) {
+                        formData.append("checksum", checksum);
+
+                        sendRequest();
+                    });
+                } else {
+                    sendRequest();
+                }
+
+                function sendRequest() {
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (data, textStatus, xhr) {
+                            {#// Get the uploader_id from the request cookies#}
+                            {#let cookies = document.cookie.split("; ");#}
+                            {#let uploaderId = null;#}
+                            {#for (let i = 0; i < cookies.length; i++) {#}
+                            {#    let cookie = cookies[i].split("=");#}
+                            {#    if (cookie[0] === "uploader_id") {#}
+                            {#        uploaderId = cookie[1];#}
+                            {#        break;#}
+                            {#    }#}
+                            {# } #}
+
+                            console.log("Chunk " + (chunkIndex + 1) + " uploaded successfully.\n");
+                            chunkIndex++;
+                            progressField.innerHTML = "Uploading... " + Math.round(chunkIndex / totalChunks * 100) + "%";
+
+                            offset += CHUNK_SIZE;
+
+                            if (chunkIndex < totalChunks) {
+                                uploadNextChunk();
+                            }
+                            else{
+                                let message = "File Uploaded Successfully";
+                                let messageHTML = "<div class='inner-card lincolngreen'><em>" + message + "</em></div>";
+                                $("#messages").append(messageHTML);
+                            }
+
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            console.error("Chunk " + (chunkIndex + 1) + " upload failed with status code " + xhr.status + ".");
+                            console.error("Message: " + xhr.responseText + ".\n");
+                            progressField.innerHTML = "<strong>" + xhr.responseText + ".</strong>";
+                            let messageHTML = "<div class='inner-card cadmium-red'><em>" + "Upload Failed" + "</em></div>";
+
+                            // Insert the message into the 'messages' section
+                            $("#messages").append(messageHTML);
+                        }
+                    });
+                }
+            }
+
+            uploadNextChunk();
+        }
+
+        $(document).ready(function () {
+            const uploadBtn = document.getElementById("uploadFile");
+            const fileInput = document.getElementById("backup_field");
+            uploadBtn.addEventListener("click", function () {
+                let filepath = fileInput.files[0];
+                if (filepath) {
+                    uploadFile(filepath);
+                }
+            });
+        });
+    </script>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <span class="row">
+            <label for="{{ upload_backup_form.file.id_for_label }}" class="custom-file-upload">
+                <i class="material-icons">attachment</i>
+                Backup
+                {{ upload_backup_form.file }}
+            </label>
+            {{ upload_backup_form.file.errors }}
+            <span id="file_progress"></span>
+        </span>
+        <br/>
+        <span class="button-row-left">
+            <button type="button" id="uploadFile">
+                <i class="material-icons">upload</i>
+                Upload
+            </button>
+            <a class="plain-link" href="{% url 'profile' %}">
+                <button type="button">
+                    <i class="material-icons">arrow_back</i>
+                    Back
+                </button>
+            </a>
+        </span>
+    </form>
+{% endblock %}

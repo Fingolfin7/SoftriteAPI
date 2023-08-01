@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from .forms import *
 from django.http import HttpResponse
@@ -43,13 +44,17 @@ def upload(request):
     file_data = request.FILES.get('file')
 
     # Authenticate the user
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    user = authenticate(request, username=username, password=password)
+    # check if a user object is in the request object if not, use the username and password from the request
+    if not request.user:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
 
-    if user is None:
-        delete_chunks(uploader_id)
-        return HttpResponse("Invalid credentials", status=401)
+        if user is None:
+            delete_chunks(uploader_id)
+            return HttpResponse("Invalid credentials", status=401)
+    else:
+        user = request.user
 
     # if the user doesn't have an associated company stop the upload
     if not user.profile.company:
@@ -133,6 +138,24 @@ def upload(request):
         return HttpResponse(f"Server error: {e}", status=500)
 
 
+""" if request.method == "POST":
+        form = UploadBackupForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.cleaned_data['file']
+            backup = Backup(user=request.user, company=request.user.profile.company, file=file)
+            backup.save()
+            messages.success(request, f"{backup.file.name} uploaded successfully.")
+        else:
+            messages.error(request, "Failed to upload file, please try again.")
+            return redirect('backups:manual_upload')
+    else:
+        form = UploadBackupForm()"""
+
+def manual_upload(request):
+    form = UploadBackupForm()
+    return render(request, 'backups/manual_upload.html', {'upload_backup_form': form})
+
+
 class BackupDeleteView(LoginRequiredMixin, DeleteView):
     model = Backup
     success_url = reverse_lazy('profile')
@@ -149,33 +172,6 @@ class BackupDeleteView(LoginRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Delete Backup"
         return context
-
-
-@login_required
-def admin_backups_page(request):
-    all_users = User.objects.all()
-    context = {
-        'all_users': all_users,
-        'title': 'Admin Backups',
-    }
-    return render(request, 'backups/backups_admin.html', context)
-
-
-@login_required
-def admin_backups_user_page(request, username):
-    """
-    View for the admin backups page. This page lists all the backups for a given user.
-    The username is passed in as an argument.
-    """
-    user = User.objects.get(username=username)
-    backups = Backup.objects.filter(user=user).order_by('-date_uploaded')
-
-    context = {
-        'backups': backups,
-        'title': 'Admin Backups',
-        'user': user,
-    }
-    return render(request, 'backups/backups_admin_user.html', context)
 
 
 class BackupListView(LoginRequiredMixin, ListView):
@@ -222,8 +218,9 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        company = Company.objects.get(id=int(self.kwargs['company_id']))
         context['title'] = 'Company Backups'
-        context['company'] = Company.objects.get(id=int(self.kwargs['company_id']))
+        context['company'] = company
         context['search_form'] = BackupSearch(initial={'start_date': self.request.GET.get('start_date'),
                                                        'end_date': self.request.GET.get('end_date'),
                                                        'name': self.request.GET.get('name')})

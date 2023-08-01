@@ -117,5 +117,13 @@
                 Back
             </button>
         </a>
+        {%  if user.profile.company == company %}
+            <a class="plain-link" href="{% url 'backups:manual_upload' %}">
+                <button type="button">
+                    <i class="material-icons">add</i>
+                    Backup
+                </button>
+            </a>
+        {% endif %}
     </span>
 {% endblock %}
