@@ -37,6 +37,7 @@
             const CHUNK_SIZE = 1024 * 1024 / 4;
             const totalChunks = Math.ceil(filepath.size / CHUNK_SIZE);
             const progressField = document.getElementById("file_progress");
+            const progressBar = document.getElementById("progress_bar");
 
             let offset = 0;
             let chunkIndex = 0;
@@ -85,6 +86,7 @@
                             chunkIndex++;
                             progressField.innerHTML = "Uploading... " + Math.round(chunkIndex / totalChunks * 100) + "%";
 
+
                             offset += CHUNK_SIZE;
 
                             if (chunkIndex < totalChunks) {
@@ -116,8 +118,10 @@
         $(document).ready(function () {
             const uploadBtn = document.getElementById("uploadFile");
             const fileInput = document.getElementById("backup_field");
+            const progressBar = document.getElementById("progress_bar");
             uploadBtn.addEventListener("click", function () {
                 let filepath = fileInput.files[0];
+                progressBar.
                 if (filepath) {
                     uploadFile(filepath);
                 }
@@ -133,9 +137,14 @@
                 {{ upload_backup_form.file }}
             </label>
             {{ upload_backup_form.file.errors }}
-            <span id="file_progress"></span>
+            <span id="file_progress">Uploading...</span>
         </span>
         <br/>
+        <span class="row">
+            <span class="meter width-90" id="progress_bar" style="display:none;">
+                <span style="width: 25%">25%</span>
+            </span>
+        </span>
         <span class="button-row-left">
             <button type="button" id="uploadFile">
                 <i class="material-icons">upload</i>

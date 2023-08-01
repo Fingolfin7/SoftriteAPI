@@ -183,7 +183,8 @@ class BackupListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Profile'
+        context['title'] = 'User Backups'
+        context['show_manual_backups'] = True
         context['search_form'] = BackupSearch(initial={'start_date': self.request.GET.get('start_date'),
                                                        'end_date': self.request.GET.get('end_date'),
                                                        'name': self.request.GET.get('name')})
@@ -220,7 +221,7 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         company = Company.objects.get(id=int(self.kwargs['company_id']))
         context['title'] = 'Company Backups'
-        context['company'] = company
+        context['show_manual_backups'] = (company == self.request.user.profile.company)
         context['search_form'] = BackupSearch(initial={'start_date': self.request.GET.get('start_date'),
                                                        'end_date': self.request.GET.get('end_date'),
                                                        'name': self.request.GET.get('name')})
