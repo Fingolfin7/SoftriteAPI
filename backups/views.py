@@ -57,6 +57,7 @@ def process_final_file_path(user, request):
     final_filename = f"{filename}"
     final_file_path = os.path.join(saveDir, final_filename)
     final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
+    os.makedirs(os.path.dirname(final_file_path), exist_ok=True)  # Create the directory if it doesn't exist
     return get_available_name(final_file_path)
 
 
