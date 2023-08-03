@@ -62,6 +62,7 @@ body {
 }
 
 .qfc-container .image4{
+  z-index: -1;
   bottom: -85px;
   right: 20px;
   width: 40px;
@@ -79,6 +80,7 @@ body {
 }
 
 .qfc-container .image6{
+  z-index: -1;
   bottom: -55px;
   right: -35px;
   width: 10px;
@@ -397,7 +399,7 @@ input[type='submit'] {
   line-height: 0;
   font-size: .8em;
   padding: 0;
-  width: 92px;
+  width: 96px;
   height: 36px;
   border: 0;
   cursor: pointer;

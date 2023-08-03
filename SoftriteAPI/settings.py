@@ -114,7 +114,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
     'https://payrite-dev.co.zw',
-    'http://payrite-dev.co.zw'
+    'http://payrite-dev.co.zw',
+    'https://adaski.co.zw',
+    'http://adaski.co.zw'
 ]
 
 # loggers

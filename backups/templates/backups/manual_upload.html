@@ -40,6 +40,7 @@
             const progressBarParent = $("#progress_bar_outer");
             const progressBar = $("#progress_bar");
 
+            progressField.text("Uploading...");
             progressBar.css("width", "0%");
             let offset = 0;
             let chunkIndex = 0;
@@ -72,17 +73,6 @@
                         contentType: false,
                         processData: false,
                         success: function (data, textStatus, xhr) {
-                            {#// Get the uploader_id from the request cookies#}
-                            {#let cookies = document.cookie.split("; ");#}
-                            {#let uploaderId = null;#}
-                            {#for (let i = 0; i < cookies.length; i++) {#}
-                            {#    let cookie = cookies[i].split("=");#}
-                            {#    if (cookie[0] === "uploader_id") {#}
-                            {#        uploaderId = cookie[1];#}
-                            {#        break;#}
-                            {#    }#}
-                            {# } #}
-
                             console.log("Chunk " + (chunkIndex + 1) + " uploaded successfully.\n");
                             chunkIndex++;
                             //progressField.innerHTML = "Uploading... " + Math.round(chunkIndex / totalChunks * 100) + "%";
@@ -108,10 +98,11 @@
                         error: function (xhr, textStatus, errorThrown) {
                             console.error("Chunk " + (chunkIndex + 1) + " upload failed with status code " + xhr.status + ".");
                             console.error("Message: " + xhr.responseText + ".\n");
-                            progressField.innerHTML = "<strong>" + xhr.responseText + ".</strong>";
+                            progressField.html("<strong>" + xhr.responseText + ".</strong>");
                             let messageHTML = "<div class='inner-card cadmium-red'><em>" + "Upload Failed" + "</em></div>";
                             $("#messages").append(messageHTML);
-                            progressBar.css('background-color', 'rgb(210, 43, 43)');
+                            progressBar.removeClass('lincolngreen');
+                            progressBar.addClass('cadmium-red');
                         }
                     });
                 }
@@ -124,17 +115,32 @@
             const uploadBtn = $("#uploadFile");
             const fileInput = $("#backup_field");
             const progressBarParent = $("#progress_bar_outer");
+            const progressBar = $("#progress_bar");
+            const messages_span = $("#messages");
 
             progressBarParent.hide();
 
             uploadBtn.click(function () {
                 let filepath = fileInput.prop('files')[0];
+                console.log(filepath)
 
                 progressBarParent.show('slow');
-                $('#file_progress').text("Uploading...");
+                progressBar.css("width", "0%");
+                progressBar.removeClass('cadmium-red');
+                messages_span.empty();
+
                 if (filepath) {
                     uploadFile(filepath);
                 }
+                else{
+                    let message = "Please select a file to upload";
+                    let messageHTML = "<div class='inner-card cadmium-red'><em>" + message + "</em></div>";
+                    messages_span.append(messageHTML);
+                    progressBarParent.hide();
+                    $('#file_progress').empty();
+                }
+                // clear the file input value
+                $("#backup_field").val("");
             });
         });
     </script>
@@ -151,8 +157,8 @@
         </span>
         <br/>
         <span class="row">
-            <span class="meter width-90" id="progress_bar_outer">
-                <span id="progress_bar"></span>
+            <span class="meter width-100" id="progress_bar_outer">
+                <span id="progress_bar" class="lincolngreen"></span>
             </span>
         </span>
         <span class="button-row-left">
