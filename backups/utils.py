@@ -26,9 +26,9 @@ def calculate_checksum(filepath: str) -> str:
 
 def get_available_name(name: str) -> str:
     if os.path.exists(name):
-        now = datetime.now()
+        now = datetime.now().strftime('%m-%d-%Y at %H.%M.%S')
         name, ext = os.path.splitext(name)
-        return f"{name} at {now.strftime('%H.%M.%S')}{ext}"
+        return f"{name} ({now}){ext}"
     return name
 
 
