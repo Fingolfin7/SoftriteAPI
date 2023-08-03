@@ -1,7 +1,8 @@
+import os.path
+
 from django.contrib import messages
 from django.contrib.auth import authenticate
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .forms import *
 from django.http import HttpResponse
@@ -20,7 +21,6 @@ def delete_chunks(uploader_id: str):
     destination = os.path.join(MEDIA_ROOT, 'uploads')
     for file in os.listdir(destination):
         if file.startswith(uploader_id):
-            print(f"Deleting {file}")
             os.remove(os.path.join(destination, file))
 
 
@@ -34,7 +34,7 @@ def upload(request):
 
     # Get or set the uploader ID cookie
     uploader_id = request.COOKIES.get('uploader_id')
-    if not uploader_id or uploader_id is None:
+    if not uploader_id:
         uploader_id = get_random_string(length=32)
         request.COOKIES['uploader_id'] = uploader_id
 
@@ -45,9 +45,9 @@ def upload(request):
 
     # Authenticate the user
     # check if a user object is in the request object if not, use the username and password from the request
-    if not request.user:
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    if username and password:
         user = authenticate(request, username=username, password=password)
 
         if user is None:
@@ -80,6 +80,18 @@ def upload(request):
             checksum = request.POST.get('checksum')
 
             saveDir = os.path.join('backups/', user.profile.company.name)
+
+            adaski_file_path = request.POST.get('save_dir')  # get the adaski file path from the request
+            if adaski_file_path:
+                adaski_file_path = os.path.normpath(adaski_file_path)
+                adaski_file_path = adaski_file_path.split('\\')  # split the path into a list
+                before_after_gen_folder = adaski_file_path[-1]  # get the before/after gen folder from the path
+                month_folder = adaski_file_path[-2]  # get the month folder
+                year_folder = adaski_file_path[-3]  # get the year folder
+                company_code_folder = adaski_file_path[-4]  # get the company code folder
+
+                saveDir = os.path.join(saveDir, company_code_folder, year_folder, month_folder, before_after_gen_folder)
+
             final_filename = f"{filename}"
             final_file_path = os.path.join(saveDir, final_filename)
             final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
@@ -111,14 +123,15 @@ def upload(request):
             # Verify checksum if provided
             calculated_checksum = calculate_checksum(final_file_path)
             if checksum and checksum != calculated_checksum:
-                backup.delete()  # Delete the backup  AND  the backup file if the checksums don't match
+                backup.delete()  # Deletes the backup  AND  the backup file if the checksums don't match
                 return HttpResponse("Invalid checksum", status=400)
 
-            if backup.filesize > (user.profile.company.max_storage - user.profile.company.used_storage):
+            if int(backup.filesize) > (user.profile.company.max_storage - user.profile.company.used_storage):
                 response_str = f"Could not upload file {backup.basename}. " \
-                               f"You cannot exceeded your storage limit of {convert_size(user.profile.company.max_storage)}. " \
+                               f"You cannot exceeded your storage limit of " \
+                               f"{convert_size(user.profile.company.max_storage)}. " \
                                f"Storage left: {convert_size(storage_left)}, " \
-                               f"upload size: {convert_size(backup.filesize)}"
+                               f"upload size: {convert_size(int(backup.filesize))}"
                 backup.delete()
                 delete_chunks(uploader_id)
                 return HttpResponse(response_str, status=413)
@@ -137,19 +150,6 @@ def upload(request):
         print(f'Error: {e}')
         return HttpResponse(f"Server error: {e}", status=500)
 
-
-""" if request.method == "POST":
-        form = UploadBackupForm(request.POST, request.FILES)
-        if form.is_valid():
-            file = form.cleaned_data['file']
-            backup = Backup(user=request.user, company=request.user.profile.company, file=file)
-            backup.save()
-            messages.success(request, f"{backup.file.name} uploaded successfully.")
-        else:
-            messages.error(request, "Failed to upload file, please try again.")
-            return redirect('backups:manual_upload')
-    else:
-        form = UploadBackupForm()"""
 
 def manual_upload(request):
     form = UploadBackupForm()
