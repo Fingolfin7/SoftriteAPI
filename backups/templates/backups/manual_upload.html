@@ -122,7 +122,6 @@
 
             uploadBtn.click(function () {
                 let filepath = fileInput.prop('files')[0];
-                console.log(filepath)
 
                 progressBarParent.show('slow');
                 progressBar.css("width", "0%");
@@ -139,11 +138,13 @@
                     progressBarParent.hide();
                     $('#file_progress').empty();
                 }
+
                 // clear the file input value
                 $("#backup_field").val("");
             });
         });
     </script>
+
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <span class="row">
@@ -155,12 +156,15 @@
             {{ upload_backup_form.file.errors }}
             <span id="file_progress"></span>
         </span>
+
         <br/>
+
         <span class="row">
             <span class="meter width-100" id="progress_bar_outer">
                 <span id="progress_bar" class="lincolngreen"></span>
             </span>
         </span>
+
         <span class="button-row-left">
             <button type="button" id="uploadFile">
                 <i class="material-icons">upload</i>
@@ -173,5 +177,6 @@
                 </button>
             </a>
         </span>
+
     </form>
 {% endblock %}

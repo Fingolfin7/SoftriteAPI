@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+{% load static %}
+{% load crispy_forms_tags %}
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'payroll_info/css/qfc-light.css' %}">
+        <link rel="stylesheet" href="{% static 'payroll_info/css/style2.css' %}">
+        <link rel="stylesheet" href="{% static 'users/css/users_tables.css' %}">
+        <!--
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codolog/form@1.0.0/dist/form.css">
+        -->
+        <link rel="stylesheet" href="{% static 'users/css/users_colours.css' %}">
+        <link rel="shortcut icon" href="{% static 'payroll_info/images/logo.jpeg' %}" type = "image/jpg">
+        {% if title %}
+            <title>{{ title }}</title>
+        {% else %}
+            <title>Softrite API</title>
+        {% endif %}
+    </head>
+
+    <body>
+        <div class="qfc-container">
+            <section class="ribbon-container">
+                {% if user.is_staff %} {% comment %} If user is staff, then link to the interbank page {% endcomment %}
+                    <a href="#">
+                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
+                    </a>
+                {% else %}
+                    <a href="#">
+                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
+                    </a>
+                {% endif %}
+            </section>
+
+            <section id="messages">
+                {% if messages %}
+                    {% for message in messages%}
+                        {% if message.tags == 'error'%}
+                            <div class="inner-card cadmium-red ">
+                                <em> {{ message }} </em>
+                            </div>
+                        {% elif message.tags == 'info'%}
+                            <div class="inner-card cobalt-blue">
+                                <em> {{ message }} </em>
+                            </div>
+                        {% else %}
+                            <div class="inner-card lincolngreen">
+                                <em> {{ message }} </em>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </section>
+
+            {% block content %}
+                <div class="image image2"></div>
+                <div class="image image4"></div>
+                <form method="GET" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <p> Download the latest version</p>
+                    <span class="button-row">
+                        <a class="plain-link" href="{% static 'users/adaskim76415.sfx.exe' %}">
+                            <button type="button" style="width: 160px;">
+                                <i class="material-icons">download</i>
+                                Version 7.6.4.15
+                            </button>
+                        </a>
+                    </span>
+                <br/>
+                </form>
+            {% endblock %}
+        </div>
+    </body>
+</html>

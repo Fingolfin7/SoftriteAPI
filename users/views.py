@@ -4,9 +4,22 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import user_passes_test
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import authentication, permissions
+from django.contrib.auth.models import User
 from .forms import *
 from backups.models import Backup
 from django.contrib import messages
+
+
+class HelloView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
 
 
 def register(request):
@@ -43,7 +56,6 @@ def login(request):
     if request == "POST":
         form = UserLoginForm(request.POST)
         if form.is_valid():
-            print('here')
             messages.success(request, 'Login successful.')
             return redirect('profile')
         else:
@@ -229,4 +241,8 @@ class CompanyDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Company deleted successfully.')
         return super().delete(request, *args, **kwargs)
+
+
+def download_adaski(request):
+    return render(request, 'users/download_adaski.html', {'title': 'Download Adaski'})
 

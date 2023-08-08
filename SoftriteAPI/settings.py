@@ -38,14 +38,22 @@ INSTALLED_APPS = [
     'backups.apps.BackupsConfig',
     'crispy_forms',
     'crispy_bootstrap4',
+    'rest_framework',
+    'rest_framework.authtoken',  # for JWT token authentication
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_cleanup.apps.CleanupConfig',  # delete old files and images on filefield and imagefield update/delete
+    'django_cleanup.apps.CleanupConfig',  # delete old files and images on file field and imagefield update/delete
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.http import HttpResponseNotFound
 from django.urls import reverse
 from .forms import *
 from .scrapers.rbz_rate import download_rbz_pdf_binary, get_rbz_rate
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import InterbankUSDRateSerializer, NECSerializer, GradesSerializer
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -47,208 +48,133 @@ def update_rbz_rate():
 
 # api endpoint to get the most recent rate.
 # We can use an external cron scheduler to call this endpoint at least once every day
+@api_view(['GET'])
 def get_latest_rate(request):
     update_rbz_rate()
     rate_obj = InterbankUSDRate.objects.order_by('-date').first()
-
-    return JsonResponse(
-        {
-            'rate': rate_obj.rate,
-            'date': rate_obj.date.strftime('%m-%d-%Y')
-        }
-    )
+    serializer = InterbankUSDRateSerializer(rate_obj)
+    return Response(serializer.data)
 
 
-def get_rate_on(request, **kwargs):
+@api_view(['GET'])
+def get_rate_on(request, date):
     try:
-        date = datetime.strptime(str(kwargs['date']), '%m-%d-%Y')
+        date = datetime.strptime(date, '%m-%d-%Y')
         rate_obj = InterbankUSDRate.objects.filter(date=date).get()
-
-        return JsonResponse(
-            {
-                'rate': rate_obj.rate,
-                'date': rate_obj.date.strftime('%m-%d-%Y')
-            }
-        )
-    except ObjectDoesNotExist:
+        serializer = InterbankUSDRateSerializer(rate_obj)
+        return Response(serializer.data)
+    except InterbankUSDRate.DoesNotExist:
         return HttpResponseNotFound("No rate found for this date")
 
 
-def get_rates_between(request, **kwargs):
-    """
-        Endpoint to get the rate between two dates.
-        :param request: request object
-        :param kwargs: start_date and end_date
-    """
+@api_view(['GET'])
+def get_rates_between(request, start_date, end_date):
     try:
-        start_date = datetime.strptime(str(kwargs['start_date']), '%m-%d-%Y')
-        end_date = datetime.strptime(str(kwargs['end_date']), '%m-%d-%Y')
+        start_date = datetime.strptime(start_date, '%m-%d-%Y')
+        end_date = datetime.strptime(end_date, '%m-%d-%Y')
         rates = InterbankUSDRate.objects.filter(date__range=[start_date, end_date]).order_by('date')
-        rates_list = []
-
-        for rate in rates:
-            rates_list.append({
-                'rate': rate.rate,
-                'date': rate.date.strftime('%m-%d-%Y')
-            })
-
-        if not rates_list:
-            # return a 404 if no rates are found
+        serializer = InterbankUSDRateSerializer(rates, many=True)
+        if not rates:
             return HttpResponseNotFound("No rates found")
-
-        return JsonResponse(rates_list, safe=False)
-    # incorrect dates format exception
+        return Response(serializer.data)
     except ValueError:
-        return HttpResponse(status=400, reason="Incorrect dates format")
-    except ObjectDoesNotExist:
+        return HttpResponseNotFound("Invalid date format")
+    except InterbankUSDRate.DoesNotExist:
         return HttpResponseNotFound("No rates found")
 
 
+@api_view(['GET'])
 def get_all_rates(request):
-    """
-        Endpoint to get all the rates so far.
-    """
-    try:
-        rates = InterbankUSDRate.objects.all().order_by('-date')
-        rates_list = []
-
-        for rate in rates:
-            rates_list.append({
-                'rate': rate.rate,
-                'date': rate.date.strftime('%m-%d-%Y')
-            })
-
-        if not rates_list:
-            # return a 404 if no rates are found
-            return HttpResponseNotFound("No rates found")
-
-        return JsonResponse(rates_list, safe=False)
-    except ObjectDoesNotExist:
+    rates = InterbankUSDRate.objects.all().order_by('-date')
+    serializer = InterbankUSDRateSerializer(rates, many=True)
+    if not rates:
         return HttpResponseNotFound("No rates found")
+    return Response(serializer.data)
 
 
+@api_view(['GET'])
 def get_necs(request):
-    """
-        Endpoint to get all the necs and their ids
-    """
-    try:
-        necs = NEC.objects.all()
-        necs_list = []
-
-        for nec in necs:
-            necs_list.append({
-                'id': nec.pk,
-                'name': nec.name
-            })
-
-        if not necs_list:
-            # return a 404 if no necs are found
-            return HttpResponseNotFound("No NECs found")
-
-        return JsonResponse(necs_list, safe=False)
-    except ObjectDoesNotExist:
+    necs = NEC.objects.all()
+    serializer = NECSerializer(necs, many=True)
+    if not necs:
         return HttpResponseNotFound("No NECs found")
+    return Response(serializer.data)
 
 
-# api endpoint to get the most recent rate for a given nec
-def get_latest_nec_rate(request, **kwargs):
+@api_view(['GET'])
+def get_latest_nec_rate(request, pk):
     try:
-        nec = NEC.objects.filter(pk=kwargs['pk']).get()
-        rate_obj = nec.rates_set.order_by('-date').first()  # ordered by date descending (latest first)
-
+        nec = NEC.objects.get(pk=pk)
+        rate_obj = nec.rates_set.order_by('-date').first()
         if not rate_obj:
-            # return a 404 if no rate is found
-            return HttpResponse(status=404, reason="No rate found for this NEC")
-
-        if not nec:
-            # return a 404 if no nec is found
-            return HttpResponse(status=404, reason="No NEC found")
-
-        return JsonResponse(
-            {
-                'nec': nec.name,
-                'rate': rate_obj.rate,
-                'date': rate_obj.date.strftime('%m-%d-%Y')
-            }
-        )
-    except ObjectDoesNotExist:
+            return HttpResponseNotFound("No rate found for this NEC")
+        serializer = InterbankUSDRateSerializer(rate_obj)
+        return Response({
+            'nec': nec.name,
+            **serializer.data
+        })
+    except NEC.DoesNotExist:
         return HttpResponseNotFound("No NEC found")
 
 
-def get_all_nec_rates(request, **kwargs):
+@api_view(['GET'])
+def get_all_nec_rates(request, pk):
     try:
-        nec = NEC.objects.filter(pk=kwargs['pk']).get()
+        nec = NEC.objects.get(pk=pk)
         rates = nec.rates_set.all().order_by('-date')
-        rates_list = []
-
-        for rate in rates:
-            rates_list.append({
-                'nec': nec.name,
-                'rate': rate.rate,
-                'date': rate.date.strftime('%m-%d-%Y')
-            })
-
-        if not rates_list:
-            # return a 404 if no rates are found
+        serializer = InterbankUSDRateSerializer(rates, many=True)
+        if not rates:
             return HttpResponseNotFound("No rates found")
-
-        return JsonResponse(rates_list, safe=False)
-    except ObjectDoesNotExist:
+        return Response([
+            {'nec': nec.name, **rate}
+            for rate in serializer.data
+        ])
+    except NEC.DoesNotExist:
         return HttpResponseNotFound("No NEC found")
 
 
-def get_nec_rate_on(request, **kwargs):
+@api_view(['GET'])
+def get_nec_rate_on(request, pk, date):
     try:
-        nec = NEC.objects.filter(pk=kwargs['pk']).get()
-        date = datetime.strptime(str(kwargs['date']), '%m-%d-%Y')
+        nec = NEC.objects.get(pk=pk)
+        date = datetime.strptime(date, '%m-%d-%Y')
         rate_obj = nec.rates_set.filter(date=date).get()
-
-        return JsonResponse(
-            {
-                'nec': nec.name,
-                'rate': rate_obj.rate,
-                'date': rate_obj.date.strftime('%m-%d-%Y')
-            }
-        )
-    except ObjectDoesNotExist:
+        serializer = InterbankUSDRateSerializer(rate_obj)
+        return Response({
+            'nec': nec.name,
+            **serializer.data
+        })
+    except (NEC.DoesNotExist, InterbankUSDRate.DoesNotExist):
         return HttpResponseNotFound("No rate found for this date")
 
 
-def get_all_nec_grades(request, **kwargs):
+@api_view(['GET'])
+def get_all_nec_grades(request, pk):
     try:
-        nec = NEC.objects.filter(pk=kwargs['pk']).get()
+        nec = NEC.objects.get(pk=pk)
         grades = nec.grades_set.all()
-        grades_list = []
-
-        for grade in grades:
-            grades_list.append({
-                'nec': nec.name,
-                'grade': grade.grade,
-                'usd_min': grade.usd_minimum,
-            })
-
-        if not grades_list:
-            # return a 404 if no grades are found
+        serializer = GradesSerializer(grades, many=True)
+        if not grades:
             return HttpResponseNotFound("No grades found")
-
-        return JsonResponse(grades_list, safe=False)
-    except ObjectDoesNotExist:
+        return Response([
+            {'nec': nec.name, **grade}
+            for grade in serializer.data
+        ])
+    except NEC.DoesNotExist:
         return HttpResponseNotFound("No NEC found")
 
 
-def get_nec_grade(request, **kwargs):
+@api_view(['GET'])
+def get_nec_grade(request, pk, grade):
     try:
-        nec = NEC.objects.filter(pk=kwargs['pk']).get()
-        grade = nec.grades_set.filter(grade=kwargs['grade']).get()
-
-        return JsonResponse(
-            {
-                'nec': nec.name,
-                'grade': grade.grade,
-                'usd_min': grade.usd_minimum,
-            }
-        )
-    except ObjectDoesNotExist:
+        nec = NEC.objects.get(pk=pk)
+        grade_obj = nec.grades_set.filter(grade=grade).get()
+        serializer = GradesSerializer(grade_obj)
+        return Response({
+            'nec': nec.name,
+            **serializer.data
+        })
+    except (NEC.DoesNotExist, Grades.DoesNotExist):
         return HttpResponseNotFound("No grade found")
 
 

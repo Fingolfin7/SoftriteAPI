@@ -9,7 +9,8 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from backups.utils import *
 
 
@@ -46,7 +47,7 @@ def process_final_file_path(user, request):
     if adaski_file_path:
         adaski_file_path = os.path.normpath(adaski_file_path)
         adaski_file_path = os.path.dirname(adaski_file_path) if os.path.isfile(adaski_file_path) else adaski_file_path
-        _, before_after_gen_folder = os.path.split(adaski_file_path)
+        adaski_file_path, before_after_gen_folder = os.path.split(adaski_file_path)
         adaski_file_path, month_folder = os.path.split(adaski_file_path)
         adaski_file_path, year_folder = os.path.split(adaski_file_path)
         _, company_code_folder = os.path.split(adaski_file_path)
@@ -109,7 +110,9 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
     return response
 
 
-@csrf_exempt
+# @csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def upload(request):
     """
     Handle the chunked upload process for chunked file uploads.
@@ -126,16 +129,18 @@ def upload(request):
     chunk_index = int(request.POST.get('chunk_index'))
     file_data = request.FILES.get('file')
 
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    if username and password:
-        user = authenticate(request, username=username, password=password)
+    # username = request.POST.get('username')
+    # password = request.POST.get('password')
+    # if username and password:
+    #     user = authenticate(request, username=username, password=password)
+    #
+    #     if user is None:
+    #         delete_chunks(uploader_id)
+    #         return HttpResponse("Invalid credentials", status=HTTP_STATUS_UNAUTHORIZED)
+    # else:
+    #     user = request.user
 
-        if user is None:
-            delete_chunks(uploader_id)
-            return HttpResponse("Invalid credentials", status=HTTP_STATUS_UNAUTHORIZED)
-    else:
-        user = request.user
+    user = request.user
 
     if not user.profile.company:
         delete_chunks(uploader_id)
