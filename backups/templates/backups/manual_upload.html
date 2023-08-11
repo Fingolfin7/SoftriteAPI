@@ -39,6 +39,7 @@
             const progressField = $("#file_progress");
             const progressBarParent = $("#progress_bar_outer");
             const progressBar = $("#progress_bar");
+            const csrf = $("input[name='csrfmiddlewaretoken']")[0].value;
 
             progressField.text("Uploading...");
             progressBar.css("width", "0%");
@@ -52,6 +53,7 @@
                 formData.append("file", blob);
                 formData.append("total_chunks", totalChunks);
                 formData.append("chunk_index", chunkIndex);
+                formData.append("csrfmiddlewaretoken", csrf);
 
                 if (chunkIndex === totalChunks - 1) {
                     formData.append("filename", filepath.name);
@@ -80,7 +82,6 @@
                             progressBar.css("width", percent);
                             progressBar.text(percent);
 
-
                             offset += CHUNK_SIZE;
 
                             if (chunkIndex < totalChunks) {
@@ -93,7 +94,6 @@
                                 progressBarParent.hide();
                                 $('#file_progress').hide();
                             }
-
                         },
                         error: function (xhr, textStatus, errorThrown) {
                             console.error("Chunk " + (chunkIndex + 1) + " upload failed with status code " + xhr.status + ".");

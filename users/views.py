@@ -1,17 +1,14 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.decorators import user_passes_test
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import authentication, permissions
-from django.contrib.auth.models import User
 from .forms import *
 from backups.models import Backup
 from django.contrib import messages
+from django.urls import reverse
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
 class HelloView(APIView):

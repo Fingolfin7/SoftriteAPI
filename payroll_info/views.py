@@ -7,7 +7,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import user_passes_test
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import InterbankUSDRateSerializer, NECSerializer, GradesSerializer
+from .serializers import InterbankUSDRateSerializer, NECSerializer, NECRatesSerializer, GradesSerializer
 
 import logging
 
@@ -108,11 +108,8 @@ def get_latest_nec_rate(request, pk):
         rate_obj = nec.rates_set.order_by('-date').first()
         if not rate_obj:
             return HttpResponseNotFound("No rate found for this NEC")
-        serializer = InterbankUSDRateSerializer(rate_obj)
-        return Response({
-            'nec': nec.name,
-            **serializer.data
-        })
+        serializer = NECRatesSerializer(rate_obj)
+        return Response(serializer.data)
     except NEC.DoesNotExist:
         return HttpResponseNotFound("No NEC found")
 
@@ -122,13 +119,10 @@ def get_all_nec_rates(request, pk):
     try:
         nec = NEC.objects.get(pk=pk)
         rates = nec.rates_set.all().order_by('-date')
-        serializer = InterbankUSDRateSerializer(rates, many=True)
+        serializer = NECRatesSerializer(rates, many=True)
         if not rates:
             return HttpResponseNotFound("No rates found")
-        return Response([
-            {'nec': nec.name, **rate}
-            for rate in serializer.data
-        ])
+        return Response(serializer.data)
     except NEC.DoesNotExist:
         return HttpResponseNotFound("No NEC found")
 
@@ -139,11 +133,8 @@ def get_nec_rate_on(request, pk, date):
         nec = NEC.objects.get(pk=pk)
         date = datetime.strptime(date, '%m-%d-%Y')
         rate_obj = nec.rates_set.filter(date=date).get()
-        serializer = InterbankUSDRateSerializer(rate_obj)
-        return Response({
-            'nec': nec.name,
-            **serializer.data
-        })
+        serializer = NECRatesSerializer(rate_obj)
+        return Response(serializer.data)
     except (NEC.DoesNotExist, InterbankUSDRate.DoesNotExist):
         return HttpResponseNotFound("No rate found for this date")
 
@@ -156,10 +147,7 @@ def get_all_nec_grades(request, pk):
         serializer = GradesSerializer(grades, many=True)
         if not grades:
             return HttpResponseNotFound("No grades found")
-        return Response([
-            {'nec': nec.name, **grade}
-            for grade in serializer.data
-        ])
+        return Response(serializer.data)
     except NEC.DoesNotExist:
         return HttpResponseNotFound("No NEC found")
 
@@ -170,10 +158,7 @@ def get_nec_grade(request, pk, grade):
         nec = NEC.objects.get(pk=pk)
         grade_obj = nec.grades_set.filter(grade=grade).get()
         serializer = GradesSerializer(grade_obj)
-        return Response({
-            'nec': nec.name,
-            **serializer.data
-        })
+        return Response(serializer.data)
     except (NEC.DoesNotExist, Grades.DoesNotExist):
         return HttpResponseNotFound("No grade found")
 
