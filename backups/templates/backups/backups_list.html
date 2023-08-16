@@ -50,7 +50,7 @@
                 {% for backup in backups %}
                     <tr>
                         <td>
-                            <a class="plain-link" href="{% url 'backups:backup_details' backup.id %}">
+                            <a href="{% url 'backups:backup_details' backup.id %}">
                                 {{ backup.basename }}
                             </a>
                         </td>
