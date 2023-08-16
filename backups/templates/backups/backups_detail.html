@@ -14,12 +14,21 @@
             // Toggle replies when the anchor tag is clicked
             $('.toggle-replies-link').on('click', function(e) {
                 e.preventDefault();
-
                 let repliesSection = $(this).closest('.comment').find('.indented');
-                repliesSection.slideToggle();
-
                 let replyForm = $(this).closest('.comment').find('.reply_form');
+
+                // Toggle the icon
+                let icon = $(this).find('i');
+                if (repliesSection.is(':visible')) {
+                    icon.text('expand_more');  // Change to expand icon
+                } else {
+                    icon.text('expand_less');  // Change to collapse icon
+                }
+
+
+                repliesSection.slideToggle();
                 replyForm.slideToggle();
+
             });
 
         });
