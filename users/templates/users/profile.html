@@ -84,7 +84,11 @@
                     <tbody>
                         {% for backup in backups %}
                             <tr>
-                                <td>{{ backup.basename }}</td>
+                                <td>
+                                    <a class="plain-link" href="{% url 'backups:backup_details' backup.id %}">
+                                        {{ backup.basename }}
+                                    </a>
+                                </td>
                                 <td>{{ backup.filesize|filesizeformat }}</td>
                                 <td>{{ backup.date_uploaded }}</td>
                                 <td>

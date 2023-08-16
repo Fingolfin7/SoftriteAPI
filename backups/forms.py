@@ -16,3 +16,13 @@ class BackupSearch(forms.Form):
 class UploadBackupForm(forms.Form):
     # allow .zip files only
     file = forms.FileField(required=True, widget=forms.FileInput(attrs={'id': 'backup_field', 'accept': '.zip'}))
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['body']
+        widgets = {
+            'body': forms.Textarea(attrs={'rows': 1, 'cols': 90, 'placeholder': 'Add a comment...'})
+        }
+        labels = {k: "" for k in fields}

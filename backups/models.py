@@ -30,12 +30,18 @@ class Backup(models.Model):
     filesize = models.IntegerField()  # store the filesize in bytes
 
     def __str__(self):
-        return f" {self.company.name} Backup on {self.date_uploaded.strftime('%m/%d/%Y at %H:%M')}" \
+        return f" {self.company.name} Backup on {self.date_uploaded.strftime('%m-%d-%Y at %H:%M')}" \
                f" by {self.user.username}"
 
     @property
     def basename(self):
         return os.path.basename(self.file.name)
+
+    @property
+    def adaski_path(self):
+        # return the filepath of the backup but remove the MEDIA_ROOT from the beginning
+        return os.path.dirname(self.file.path).replace(
+            os.path.join(os.getcwd(), os.path.normpath('media/backups/')), '')
 
     def save(self, *args, **kwargs):
         self.filesize = self.file.size
@@ -60,3 +66,19 @@ class Backup(models.Model):
             self.file.delete()"""
 
         super().delete(*args, **kwargs)
+
+
+class Comment(models.Model):
+    backup = models.ForeignKey(Backup, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    # allows for replies to comments
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+
+    class Meta:
+        ordering = ['created']
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.created.strftime('%m-%d-%Y at %H:%M')}"
+

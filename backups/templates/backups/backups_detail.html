@@ -1,0 +1,129 @@
+{% extends 'backups/base.html' %}
+
+<!-- add this line to include the custom tag we made in the param_replace.py file -->
+{% load param_replace %}
+
+{% block content %}
+    <section id="backup-record-info">
+        <span class="flex-row">
+            File Name: <strong>{{ backup.basename }}</strong>
+        </span>
+        <br/>
+        <span class="flex-row">
+            Backup location: <strong>{{ backup.adaski_path }}</strong>
+        </span>
+        <br/>
+        <span class="flex-row">
+            File size: <strong>{{ backup.filesize|filesizeformat }}</strong>
+        </span>
+        <br/>
+        <span class="flex-row">
+            Date uploaded: <strong>{{ backup.date_uploaded }}</strong>
+        </span>
+        <br/>
+        <span class="flex-row">
+            Uploaded by: <strong>{{ backup.user.username }}</strong>
+        </span>
+    </section>
+
+    <section id="add_comment">
+        <span class="section-header">Add a Comment</span>
+        <form method="POST">
+            {% csrf_token %}
+            <span class="flex-row">
+                {{ comment_form.as_p }}
+                <button type="submit" class="plain-button">
+                    <i class="material-icons">comment</i>
+                </button>
+            </span>
+        </form>
+    </section>
+
+    <section id="comments-list">
+        {% if comments %}
+            {#  show comment count for comments without parents (i.e all the comments that aren't replies) #}
+            <span class="section-header">{{ comments.count }} comment{{ comments|pluralize }}</span>
+            <br/>
+            {% for comment in comments %}
+                <div class="comment">
+                    <span class="button-row-left">
+                        <strong>{{ comment.user }}</strong>
+                        <span>{{ comment.created }}</span>
+                        <span>({{ comment.replies.count }} repl{{ comment.replies.count|pluralize:"y,ies" }})</span>
+                    </span>
+                    <p>{{ comment.body|linebreaks }}</p>
+
+                    <div class="indented">
+                        {% if comment.replies %}
+                            {% for reply in comment.replies.all %}
+                                <div class="reply">
+                                    <span class="button-row-left">
+                                        <strong>{{ reply.user }}</strong>
+                                        <span>{{ reply.created }}</span>
+                                    </span>
+                                    <p>{{ reply.body|linebreaks }}</p>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <span class="button-row-left">
+                            {{ comment_form.as_p }}
+                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                            <button type="submit" class="plain-button">
+                                <i class="material-icons">send</i>
+                            </button>
+                        </span>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No comments yet.</p>
+        {% endif %}
+    </section>
+
+    {% if is_paginated %}
+        <div class="button-row-left width-100">
+            {% if page_obj.has_previous %}
+                <a href="?{% param_replace page=1 %}" class="plain-link no-border button">
+                    <i class="material-icons md-18 no-padding">first_page</i>
+                </a>
+                <a href="?{% param_replace page=page_obj.previous_page_number %}" class="plain-link no-border button">
+                    <i class="material-icons md-18 no-padding">navigate_before</i>
+                </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <a href="?{% param_replace page=num %}" class="plain-link no-border button" style="color: var(--form-theme-color)">
+                        <span style="font-size: 18px; padding:0.4rem;">{{num}}</span>
+                    </a>
+                {% elif  num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                    <a href="?{% param_replace page=num %}" class="plain-link no-border button">
+                        <span style="font-size: 18px; padding:0.4rem;">{{num}}</span>
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?{% param_replace page=page_obj.next_page_number %}" class="plain-link no-border button">
+                    <i class="material-icons md-18 no-padding">navigate_next</i>
+                </a>
+                <a href="?{% param_replace page=page_obj.paginator.num_pages %}" class="plain-link no-border button">
+                    <i class="material-icons md-18 no-padding">last_page</i>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <span class="button-row-left">
+        <a class="plain-link" href="{% url 'profile' %}">
+            <button type="button">
+                <i class="material-icons">arrow_back</i>
+                Back
+            </button>
+        </a>
+    </span>
+{% endblock %}

@@ -2,7 +2,8 @@ import os.path
 import uuid
 from django.contrib import messages
 from django.contrib.auth import authenticate
-from django.shortcuts import render
+from django.db import IntegrityError
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from .forms import *
 from django.http import HttpResponse
@@ -256,3 +257,53 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(file__icontains=name)
         # only show backups by company
         return queryset.filter(company_id=int(self.kwargs['company_id']))
+
+
+class BackupDetailView(LoginRequiredMixin, ListView):
+    model = Comment
+    template_name = 'backups/backups_detail.html'
+    context_object_name = 'comments'
+    ordering = ['-created']
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        backup = get_object_or_404(Backup, id=self.kwargs['pk'])
+        context['title'] = 'Backup Details'
+        context['backup'] = backup
+        context['comment_form'] = CommentForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        backup_id = int(self.kwargs['pk'])
+        parent_id = request.POST.get('parent_id')
+
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.user = request.user
+            comment.backup_id = backup_id
+
+            if parent_id:
+                comment.parent_id = int(parent_id)
+                message = 'Reply added successfully'
+            else:
+                message = 'Comment added successfully'
+
+            try:
+                comment.save()
+                messages.success(request, message)
+            except IntegrityError:
+                messages.error(request, 'Error adding comment. Please try again.')
+
+        else:
+            messages.error(request, 'Error adding comment. Please try again.')
+
+        return redirect(self.get_success_url())
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(backup_id=int(self.kwargs['pk']), parent=None)
+
+    def get_success_url(self):
+        return reverse_lazy('backups:backup_details', kwargs={'pk': self.kwargs['pk']})

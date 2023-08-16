@@ -377,9 +377,9 @@ select:focus {
   border: 5px solid var(--input-bg-color);
 }
 
-.qfc-container textarea {
-  height: 10em;
-}
+/*.qfc-container textarea {*/
+/*  height: 10em;*/
+/*}*/
 
 .qfc-container select {
   margin-top: 5px;

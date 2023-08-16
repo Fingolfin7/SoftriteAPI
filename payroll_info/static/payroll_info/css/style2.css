@@ -74,6 +74,12 @@ body{
   align-items: center;
 }
 
+/* indented section class, for comment replies*/
+.indented{
+  margin-left: 2rem;
+}
+
+
 .button-row{
   display: flex;
   justify-content: center;
