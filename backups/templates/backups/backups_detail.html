@@ -1,10 +1,31 @@
-{% extends 'backups/base.html' %}
-
+{% extends 'payroll_info/base.html' %}
+{% load static %}
 <!-- add this line to include the custom tag we made in the param_replace.py file -->
 {% load param_replace %}
 
 {% block content %}
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Hide all reply sections and forms on page load
+            $('.indented').hide();
+            $('.comment .reply_form').hide();
+
+            // Toggle replies when the anchor tag is clicked
+            $('.toggle-replies-link').on('click', function(e) {
+                e.preventDefault();
+
+                let repliesSection = $(this).closest('.comment').find('.indented');
+                repliesSection.slideToggle();
+
+                let replyForm = $(this).closest('.comment').find('.reply_form');
+                replyForm.slideToggle();
+            });
+
+        });
+    </script>
     <section id="backup-record-info">
+        <span class="section-header">Backup Info</span>
         <span class="flex-row">
             File Name: <strong>{{ backup.basename }}</strong>
         </span>
@@ -26,8 +47,10 @@
         </span>
     </section>
 
+    <br/>
+
     <section id="add_comment">
-        <span class="section-header">Add a Comment</span>
+        <span class="section-header">Comments</span>
         <form method="POST">
             {% csrf_token %}
             <span class="flex-row">
@@ -39,27 +62,30 @@
         </form>
     </section>
 
+    <br/>
+
     <section id="comments-list">
         {% if comments %}
-            {#  show comment count for comments without parents (i.e all the comments that aren't replies) #}
-            <span class="section-header">{{ comments.count }} comment{{ comments|pluralize }}</span>
-            <br/>
+{#            <span class="section-header">{{ comments.count }} comment{{ comments|pluralize }}</span>#}
             {% for comment in comments %}
                 <div class="comment">
-                    <span class="button-row-left">
+                    <span class="flex-row width-45 ">
                         <strong>{{ comment.user }}</strong>
-                        <span>{{ comment.created }}</span>
-                        <span>({{ comment.replies.count }} repl{{ comment.replies.count|pluralize:"y,ies" }})</span>
+                        <em>{{ comment.created }}</em>
+                         <a href="#" class="toggle-replies-link plain-link">
+                            {{ comment.replies.count }} repl{{ comment.replies.count|pluralize:"y,ies" }}
+                             <i class="material-icons md-18 no-padding">expand_more</i>
+                        </a>
                     </span>
                     <p>{{ comment.body|linebreaks }}</p>
 
-                    <div class="indented">
+                    <div class="indented" id="comment_{{ comment_id }}_replies">
                         {% if comment.replies %}
                             {% for reply in comment.replies.all %}
                                 <div class="reply">
                                     <span class="button-row-left">
                                         <strong>{{ reply.user }}</strong>
-                                        <span>{{ reply.created }}</span>
+                                        <em>{{ reply.created }}</em>
                                     </span>
                                     <p>{{ reply.body|linebreaks }}</p>
                                 </div>
@@ -67,7 +93,7 @@
                         {% endif %}
                     </div>
 
-                    <form method="POST">
+                    <form method="POST" class="reply_form">
                         {% csrf_token %}
                         <span class="button-row-left">
                             {{ comment_form.as_p }}
@@ -77,6 +103,8 @@
                             </button>
                         </span>
                     </form>
+
+                    <br/>
                 </div>
             {% endfor %}
         {% else %}
