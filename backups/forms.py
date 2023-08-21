@@ -23,6 +23,6 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['body']
         widgets = {
-            'body': forms.Textarea(attrs={'rows': 1, 'cols': 90, 'placeholder': 'Add a comment...'})
+            'body': forms.Textarea(attrs={'rows': 1, 'cols': 115, 'placeholder': 'Add a comment...'})
         }
         labels = {k: "" for k in fields}

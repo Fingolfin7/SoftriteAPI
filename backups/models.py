@@ -30,7 +30,7 @@ class Backup(models.Model):
     filesize = models.IntegerField()  # store the filesize in bytes
 
     def __str__(self):
-        return f" {self.company.name} Backup on {self.date_uploaded.strftime('%m-%d-%Y at %H:%M')}" \
+        return f"{self.company.name} Backup on {self.date_uploaded.strftime('%m-%d-%Y at %H:%M')}" \
                f" by {self.user.username}"
 
     @property

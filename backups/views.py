@@ -1,18 +1,16 @@
-import os.path
 import uuid
-from django.contrib import messages
-from django.contrib.auth import authenticate
-from django.db import IntegrityError
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+import os.path
 from .forms import *
+from backups.utils import *
+from django.contrib import messages
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from backups.utils import *
 
 
 HTTP_STATUS_METHOD_NOT_ALLOWED = 405
@@ -105,6 +103,12 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
         delete_chunks(uploader_id)
         return HttpResponse(response_str, status=HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE)
 
+    # get comment and create a comment object
+    comment = request.POST.get('comment')
+    if comment and comment != '':
+        comment = Comment(user=user, backup=backup, body=comment.strip())
+        comment.save()
+
     response = HttpResponse("File uploaded successfully", status=200)
     response.set_cookie('uploader_id', uploader_id, httponly=True)
     print(response.content)
@@ -128,6 +132,8 @@ def upload(request):
 
     total_chunks = int(request.POST.get('total_chunks'))
     chunk_index = int(request.POST.get('chunk_index'))
+    filesize = int(request.POST.get('filesize'))
+    filename = request.POST.get('filename')
     file_data = request.FILES.get('file')
 
     # username = request.POST.get('username')
@@ -146,6 +152,16 @@ def upload(request):
     if not user.profile.company:
         delete_chunks(uploader_id)
         return HttpResponse(f"User '{user.username}' is not associated with a company.", status=HTTP_STATUS_UNAUTHORIZED)
+
+    storage_left = user.profile.company.max_storage - user.profile.company.used_storage
+    if int(filesize) > storage_left:
+        response_str = f"Could not upload file {filename}. " \
+                       f"You cannot exceed your storage limit of " \
+                       f"{convert_size(user.profile.company.max_storage)}. " \
+                       f"Storage left: {convert_size(storage_left)}, " \
+                       f"upload size: {convert_size(int(filesize))}"
+        delete_chunks(uploader_id)
+        return HttpResponse(response_str, status=HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE)
 
     try:
         save_chunk_to_temp_file(uploader_id, chunk_index, file_data)

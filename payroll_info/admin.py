@@ -8,6 +8,6 @@ admin.site.register(NEC)
 admin.site.register(Rates)
 admin.site.register(Grades)
 
-# admin.site.site_header = 'Payroll Info'
-# admin.site.site_title = 'Payroll Info'
-# admin.site.index_title = 'Admin'
+admin.site.site_header = 'Softrite API'
+admin.site.site_title = 'Softrite API'
+admin.site.index_title = 'Database Admin'
