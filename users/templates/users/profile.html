@@ -85,7 +85,7 @@
                         {% for backup in backups %}
                             <tr>
                                 <td>
-                                    <a class="plain-link" href="{% url 'backups:backup_details' backup.id %}">
+                                    <a href="{% url 'backups:backup_details' backup.id %}">
                                         {{ backup.basename }}
                                     </a>
                                 </td>
@@ -118,6 +118,9 @@
                         <a href="{% url 'backups:company_list' user.profile.company.id %}">
                             <button type="button">{{ user.profile.company.code }} Backups</button>
                         </a>
+{#                          <a href="{% url 'backups:file_browser' %}">#}
+{#                              <button type="button">{{ user.profile.company.code }} Backups</button>#}
+{#                          </a>#}
                     {% endif %}
                 </div>
             {% else %}
@@ -133,6 +136,9 @@
                             <a href="{% url 'backups:company_list' user.profile.company.id %}">
                                 <button type="button">{{ user.profile.company.code }} Backups</button>
                             </a>
+{#                            <a href="{% url 'backups:file_browser' %}">#}
+{#                                <button type="button">{{ user.profile.company.code }} Backups</button>#}
+{#                            </a>#}
                         </div>
                     <br/>
                 {% else %}

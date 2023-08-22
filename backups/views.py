@@ -5,13 +5,12 @@ from backups.utils import *
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-
 
 HTTP_STATUS_METHOD_NOT_ALLOWED = 405
 HTTP_STATUS_UNAUTHORIZED = 401
@@ -67,7 +66,8 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
 
     if not final_file_path.endswith('.zip'):
         delete_chunks(uploader_id)
-        return HttpResponse("Invalid file type. Only .zip files are allowed.", status=HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE)
+        return HttpResponse("Invalid file type. Only .zip files are allowed.",
+                            status=HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE)
 
     with open(final_file_path, 'wb') as final_file:
         for i in range(total_chunks):
@@ -151,7 +151,8 @@ def upload(request):
 
     if not user.profile.company:
         delete_chunks(uploader_id)
-        return HttpResponse(f"User '{user.username}' is not associated with a company.", status=HTTP_STATUS_UNAUTHORIZED)
+        return HttpResponse(f"User '{user.username}' is not associated with a company.",
+                            status=HTTP_STATUS_UNAUTHORIZED)
 
     storage_left = user.profile.company.max_storage - user.profile.company.used_storage
     if int(filesize) > storage_left:
@@ -181,6 +182,62 @@ def upload(request):
 def manual_upload(request):
     form = UploadBackupForm()
     return render(request, 'backups/manual_upload.html', {'upload_backup_form': form})
+
+
+def file_browser_view(request, path=''):
+    """
+    view that lists all the files in the user's company's backup folder. If the user is a staff member or superuser,
+    they can view the backups for all the companies (i.e. the backup root folder).
+    """
+
+    if request.user.is_staff or request.user.is_superuser:
+        base_path = os.path.join(MEDIA_ROOT, 'backups')
+        backups = Backup.objects.all().order_by('-date_uploaded')
+    else:
+        company = request.user.profile.company
+        base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)  # media_root/backups/company_name/
+        backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
+
+    path = os.path.normpath(os.path.join(base_path, path))
+    subdirectories = []
+    files = []
+
+    if os.path.isdir(path):
+        items = os.listdir(path)
+        subdirectories = [item for item in items if os.path.isdir(os.path.join(path, item))]
+        # filter backup files to show only the backups in this current directory
+        files = [backup for backup in backups if backup.basename in items]
+
+    path_segments = [segment for segment in path.split('\\') if segment]
+
+    one_level_up_url = None
+    if len(path_segments) > 1:
+        one_up = os.path.normpath('\\'.join(path_segments[:-1]))
+
+        if len(one_up) >= len(base_path):  # ensure the new path stays within the intended base path
+            one_level_up_url = reverse('backups:file_browser', kwargs={'path': one_up})
+
+    clickable_path_segments = []
+    for i, segment in enumerate(path_segments):
+        segment_path = os.path.normpath('/'.join(path_segments[:i + 1]))
+        segment_url = reverse('backups:file_browser', kwargs={'path': segment_path})
+        clickable_path_segments.append((segment, segment_url))
+
+    clickable_path_segments = [seg_tuple for seg_tuple in clickable_path_segments if seg_tuple[0] not in MEDIA_ROOT]
+
+    if not (request.user.is_staff or request.user.is_superuser):  # if the user is not a staff member or superuser
+        clickable_path_segments = clickable_path_segments[1:]  # remove the 'backups' folder from the clickable path
+
+    context = {
+        'files': files,
+        'current_path': path,
+        'title': 'Browse Files',
+        'subdirectories': subdirectories,
+        'one_level_up_url': one_level_up_url,
+        'clickable_path_segments': clickable_path_segments,
+    }
+
+    return render(request, "backups/file_browser.html", context)
 
 
 class BackupDeleteView(LoginRequiredMixin, DeleteView):

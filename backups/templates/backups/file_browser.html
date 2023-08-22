@@ -1,0 +1,82 @@
+{% extends 'payroll_info/base.html' %}
+{% load static %}
+{% block content %}
+
+    <p>
+        <u>Current Folder:</u>
+        {% for segment, segment_url in clickable_path_segments %}
+            <a href="{{ segment_url }}" class="plain-link">{{ segment }}</a>
+            <b> > </b>
+        {% endfor %}
+    </p>
+    {% if one_level_up_url %}
+        <p>
+            <a class="plain-link" href="{{ one_level_up_url }}">
+                <b>
+                    <i class="material-icons" style="font-size: 1rem;">arrow_upward</i>
+                    Up
+                </b>
+            </a>
+        </p>
+    {% endif %}
+
+
+
+    {% if subdirectories %}
+        <h4>Folders:</h4>
+        <ul>
+            {% for subdirectory in subdirectories %}
+                <li>
+                    <a class="plain-link" href="{% url 'backups:file_browser' path=current_path|add:'\\'|add:subdirectory %}">
+                        <i class="material-icons">folder</i>
+                        {{ subdirectory }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if files %}
+        <h4>Files:</h4>
+        <table>
+                <thead>
+                   <tr>
+                       <th>File Name</th>
+                       <th>Uploaded</th>
+                        {% if user.profile.is_company_admin or user.is_staff %}
+                            <th>Uploader</th>
+                        {% endif %}
+                       <th>Download</th>
+                        {% if user.profile.is_company_admin or user.is_staff %}
+                            <th>Delete</th>
+                        {% endif %}
+                   </tr>
+                </thead>
+                {% for backup in files %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'backups:backup_details' backup.id %}">
+                                {{ backup.basename }}
+                            </a>
+                        </td>
+                        <td>{{ backup.date_uploaded }}</td>
+                        {% if user.profile.is_company_admin or user.is_staff %}
+                            <td>{{ backup.user.username }}</td>
+                        {% endif %}
+                        <td>
+                            <a class="plain-link" href="{{ backup.file.url }}">
+                                <i class="material-icons">download</i>
+                            </a>
+                        </td>
+                        {% if user.profile.is_company_admin or user.is_staff %}
+                            <td>
+                                <a class="plain-link" href="{% url 'backups:delete' backup.id %}">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+    {% endif %}
+{% endblock %}

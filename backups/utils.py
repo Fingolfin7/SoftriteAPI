@@ -1,7 +1,10 @@
+import logging
 import os
 import hashlib
 from datetime import datetime
 from SoftriteAPI.settings import MEDIA_ROOT
+
+logger = logging.getLogger(__name__)
 
 
 def convert_size(size_bytes: int | bytes) -> str:
@@ -34,9 +37,32 @@ def get_available_name(name: str) -> str:
 
 def cleanup_incomplete_uploads():
     destination = os.path.join(MEDIA_ROOT, 'uploads')
+    MAX_AGE = 60 * 60 * 3  # 3 hours
     for file in os.listdir(destination):
         file_path = os.path.join(destination, file)
-        # check if file is older than 3 hours old, if so, delete it
-        if os.stat(file_path).st_mtime < datetime.now().timestamp() - 10800:  # 10800 seconds = 3 hours
+        # check if file is older than the max age, if so, delete it
+        if os.stat(file_path).st_mtime < datetime.now().timestamp() - MAX_AGE:
             if os.path.isfile(file_path):
                 os.remove(file_path)
+
+
+def remove_empty_folders(path, removeRoot=True):  # removeRoot specifies whether to delete the root dir
+    """Function to remove empty folders"""
+    if not os.path.isdir(path):
+        return
+
+    # remove empty folders
+    files = os.listdir(path)
+    if len(files):
+        for f in files:
+            fullpath = os.path.join(path, f)
+            if os.path.isdir(fullpath):
+                remove_empty_folders(fullpath)
+
+    # if folder empty, delete it
+    files = os.listdir(path)
+    if len(files) == 0 and removeRoot:
+        logger.info(f"Removed empty dir: {path}")
+        os.rmdir(path)
+
+
