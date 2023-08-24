@@ -68,7 +68,9 @@ body{
   margin-bottom: 1rem;
   padding: 1rem;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.35);
-}  .flex-row{
+}
+
+.flex-row{
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -277,15 +279,32 @@ label > input[type="file"] {
   color: inherit;
 }
 
-.plain-button{
+.qfc-container  .plain-form{
+  padding-top: 0;
+}
+
+.qfc-container .plain-button,
+input[type='button'].plain-button,
+input[type='reset'].plain-button,
+input[type='submit'].plain-button{
     background-color: transparent;
     width: auto !important;
     border: none;
     color: inherit;
     padding: 0;
     font: inherit;
+    font-size: 1rem;
     cursor: pointer;
     outline: inherit;
+    text-transform: none;
+}
+
+.qfc-container .plain-button:hover,
+input[type='button'].plain-button:hover,
+input[type='reset'].plain-button:hover,
+input[type='submit'].plain-button:hover {
+  color: var(--button-hover); /* --button hover is defined in the qfc-light.css file */
+  background: none;
 }
 
 /*icons*/

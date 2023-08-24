@@ -396,8 +396,7 @@ input[type='button'],
 input[type='reset'],
 input[type='submit'] {
   font-family: inherit;
-  line-height: 0;
-  font-size: .8em;
+  line-height: 0;font-size: .8em;
   padding: 0;
   width: 96px;
   height: 36px;

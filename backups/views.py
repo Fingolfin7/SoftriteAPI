@@ -184,11 +184,15 @@ def manual_upload(request):
     return render(request, 'backups/manual_upload.html', {'upload_backup_form': form})
 
 
-def file_browser_view(request, path=''):
+def file_browser_view(request):
     """
     view that lists all the files in the user's company's backup folder. If the user is a staff member or superuser,
     they can view the backups for all the companies (i.e. the backup root folder).
     """
+    if request.method == 'POST':
+        path = request.POST.get('path', '')
+    else:
+        path = request.GET.get('path', '')
 
     if request.user.is_staff or request.user.is_superuser:
         base_path = os.path.join(MEDIA_ROOT, 'backups')
@@ -210,18 +214,24 @@ def file_browser_view(request, path=''):
 
     path_segments = [segment for segment in path.split('\\') if segment]
 
-    one_level_up_url = None
+    # one_level_up_url = None
+    # if len(path_segments) > 1:
+    #     one_up = os.path.normpath('\\'.join(path_segments[:-1]))
+    #
+    #     if len(one_up) >= len(base_path):  # ensure the new path stays within the intended base path
+    #         one_level_up_url = reverse('backups:file_browser', kwargs={'path': one_up})
+
+    one_level_up = None
     if len(path_segments) > 1:
         one_up = os.path.normpath('\\'.join(path_segments[:-1]))
 
         if len(one_up) >= len(base_path):  # ensure the new path stays within the intended base path
-            one_level_up_url = reverse('backups:file_browser', kwargs={'path': one_up})
+            one_level_up = one_up
 
     clickable_path_segments = []
     for i, segment in enumerate(path_segments):
         segment_path = os.path.normpath('/'.join(path_segments[:i + 1]))
-        segment_url = reverse('backups:file_browser', kwargs={'path': segment_path})
-        clickable_path_segments.append((segment, segment_url))
+        clickable_path_segments.append((segment, segment_path))
 
     clickable_path_segments = [seg_tuple for seg_tuple in clickable_path_segments if seg_tuple[0] not in MEDIA_ROOT]
 
@@ -233,7 +243,7 @@ def file_browser_view(request, path=''):
         'current_path': path,
         'title': 'Browse Files',
         'subdirectories': subdirectories,
-        'one_level_up_url': one_level_up_url,
+        'one_level_up': one_level_up,
         'clickable_path_segments': clickable_path_segments,
     }
 

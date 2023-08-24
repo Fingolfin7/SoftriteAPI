@@ -2,42 +2,53 @@
 {% load static %}
 {% block content %}
 
-    <p>
+    <span class="row">
         <u>Current Folder:</u>
-        {% for segment, segment_url in clickable_path_segments %}
-            <a href="{{ segment_url }}" class="plain-link">{{ segment }}</a>
-            <b> > </b>
+        {% for segment, segment_path in clickable_path_segments %}
+            <form method="post" action="{% url 'backups:file_browser' %}" class="plain-form" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="path" value="{{ segment_path }}">
+                <button type="submit" class="plain-button">{{ segment }}</button>
+            </form>
+            <span style="margin: 0; padding: 0 0.5rem 0 0.5rem;"> > </span>
         {% endfor %}
-    </p>
-    {% if one_level_up_url %}
-        <p>
-            <a class="plain-link" href="{{ one_level_up_url }}">
+    </span>
+
+    {% if one_level_up %}
+        <form method="post" action="{% url 'backups:file_browser' %}" class="plain-form">
+            {% csrf_token %}
+            <input type="hidden" name="path" value="{{ one_level_up }}">
+            <button type="submit" class="plain-button">
                 <b>
                     <i class="material-icons" style="font-size: 1rem;">arrow_upward</i>
                     Up
                 </b>
-            </a>
-        </p>
+            </button>
+        </form>
     {% endif %}
 
 
 
     {% if subdirectories %}
-        <h4>Folders:</h4>
+        <span class="section-header">Folders</span>
         <ul>
             {% for subdirectory in subdirectories %}
                 <li>
-                    <a class="plain-link" href="{% url 'backups:file_browser' path=current_path|add:'\\'|add:subdirectory %}">
-                        <i class="material-icons">folder</i>
-                        {{ subdirectory }}
-                    </a>
+                    <form method="post" action="{% url 'backups:file_browser' %}" class="plain-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="path" value="{{ current_path|add:'\\'|add:subdirectory }}">
+                        <button type="submit" class="plain-button">
+                            <i class="material-icons">folder</i>
+                            {{ subdirectory }}
+                        </button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>
     {% endif %}
 
     {% if files %}
-        <h4>Files:</h4>
+        <span class="section-header">Files</span>
         <table>
                 <thead>
                    <tr>
