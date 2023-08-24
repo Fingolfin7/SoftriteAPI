@@ -1,7 +1,7 @@
 {% extends 'payroll_info/base.html' %}
 {% load static %}
 {% block content %}
-
+    <div class="image image2"></div>
     <span class="row">
         <u>Current Folder:</u>
         {% for segment, segment_path in clickable_path_segments %}
@@ -90,4 +90,7 @@
                 {% endfor %}
             </table>
     {% endif %}
+    <br/>
+    <br/>
+    <br/>
 {% endblock %}

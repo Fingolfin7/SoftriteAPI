@@ -78,6 +78,7 @@ class UpdateProfileForm(forms.ModelForm):
         help_texts = {k: "" for k in fields}
         labels = {k: "" for k in fields}
 
+
 class CompanySearchForm(forms.Form):
     name = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Company Name'}),
                            label="")
@@ -89,5 +90,4 @@ class UserSearchForm(forms.Form):
     username = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Username'}),
                                label="")
     email = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Email'}),
-                             label="")
-
+                            label="")

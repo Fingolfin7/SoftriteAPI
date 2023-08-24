@@ -43,6 +43,8 @@
                             <a class="plain-link plain" href="{% url 'update_company'  user.profile.company.id %}">
                                 <b>{{ user.profile.company.code }} Info</b>
                             </a>
+                        {% endif %}
+                        {%  if user.is_staff or user.profile.is_company_admin and user.profile.company %}
                             <a class="plain-link" href="{% url 'backups:file_browser' %}">
                                 <b>Backups Explorer</b>
                             </a>

@@ -1,4 +1,4 @@
-{% extends 'backups/base.html' %}
+{% extends 'payroll_info/base.html' %}
 {% block content %}
 {% load static %}
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -39,6 +39,7 @@
             const progressField = $("#file_progress");
             const progressBarParent = $("#progress_bar_outer");
             const progressBar = $("#progress_bar");
+            const comment = $("#backup_comment")[0].value;
             const csrf = $("input[name='csrfmiddlewaretoken']")[0].value;
 
             progressField.text("Uploading...");
@@ -53,11 +54,15 @@
                 formData.append("file", blob);
                 formData.append("total_chunks", totalChunks);
                 formData.append("chunk_index", chunkIndex);
+                formData.append("filename", filepath.name);
+                formData.append("filesize", filepath.size);
                 formData.append("csrfmiddlewaretoken", csrf);
 
                 if (chunkIndex === totalChunks - 1) {
-                    formData.append("filename", filepath.name);
-
+                    if (comment !== ""){
+                        formData.append("comment", comment);
+                    }
+                    formData.append('save_dir', 'Manual Uploads')
                     calculateChecksum(filepath, function (checksum) {
                         formData.append("checksum", checksum);
 
@@ -114,11 +119,32 @@
         $(document).ready(function () {
             const uploadBtn = $("#uploadFile");
             const fileInput = $("#backup_field");
+            const showSelectedFile = $("#show_selected_file");
             const progressBarParent = $("#progress_bar_outer");
             const progressBar = $("#progress_bar");
             const messages_span = $("#messages");
 
             progressBarParent.hide();
+            uploadBtn.hide();
+
+            // Show the selected file name when the select file button changes
+            fileInput.change(function(){
+                let filepath = fileInput.prop('files')[0];
+                let filename = filepath.name;
+                showSelectedFile.empty();
+                if (filename){
+                    uploadBtn.show();
+                    showSelectedFile.append(
+                        "<br/>" +
+                        "<p>" +
+                        "Selected File: <b>" + filename + "</b>" +
+                        "</p>"
+                    );
+                }
+                else{
+                    uploadBtn.hide();
+                }
+            })
 
             uploadBtn.click(function () {
                 let filepath = fileInput.prop('files')[0];
@@ -140,7 +166,10 @@
                 }
 
                 // clear the file input value
-                $("#backup_field").val("");
+                fileInput.val("");
+                showSelectedFile.empty();
+                uploadBtn.hide();
+                $("#backup_comment").val("");
             });
         });
     </script>
@@ -157,6 +186,15 @@
             <span id="file_progress"></span>
         </span>
 
+        <span id="show_selected_file">
+        </span>
+
+        <br/>
+
+        <span class="flex-row">
+            <textarea id="backup_comment" rows="1" cols="115" placeholder="Add a comment..."></textarea>
+        </span>
+
         <br/>
 
         <span class="row">
@@ -166,16 +204,16 @@
         </span>
 
         <span class="button-row-left">
-            <button type="button" id="uploadFile">
-                <i class="material-icons">upload</i>
-                Upload
-            </button>
             <a class="plain-link" href="{% url 'profile' %}">
                 <button type="button">
                     <i class="material-icons">arrow_back</i>
                     Back
                 </button>
             </a>
+            <button type="button" id="uploadFile">
+                <i class="material-icons">upload</i>
+                Upload
+            </button>
         </span>
 
     </form>

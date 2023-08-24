@@ -5,7 +5,7 @@ from backups.utils import *
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +18,8 @@ HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415
 HTTP_STATUS_BAD_REQUEST = 400
 HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE = 413
 HTTP_STATUS_SERVER_ERROR = 500
+
+logger = logging.getLogger(__name__)
 
 
 def save_chunk_to_temp_file(uploader_id, chunk_index, file_data):
@@ -111,6 +113,7 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
 
     response = HttpResponse("File uploaded successfully", status=200)
     response.set_cookie('uploader_id', uploader_id, httponly=True)
+    logger.info(f"User '{user.username}' ({user.profile.company.name}) uploaded file '{backup.basename}' successfully.")
     print(response.content)
     return response
 
@@ -175,7 +178,7 @@ def upload(request):
             return response
     except Exception as e:
         delete_chunks(uploader_id)
-        print(f'Error: {e}')
+        logger.error(f'Error uploading file. Error: {e}')
         return HttpResponse(f"Server error: {e}", status=HTTP_STATUS_SERVER_ERROR)
 
 
@@ -202,6 +205,11 @@ def file_browser_view(request):
         base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)  # media_root/backups/company_name/
         backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
 
+    # if this is the root folder then go ahead and run remove_empty_folders() to remove any empty subdirectories
+    # before the user sees them
+    if path == '':
+        remove_empty_folders(base_path, removeRoot=False)  # removeRoot=False means don't delete the root 'base' folder
+
     path = os.path.normpath(os.path.join(base_path, path))
     subdirectories = []
     files = []
@@ -210,23 +218,18 @@ def file_browser_view(request):
         items = os.listdir(path)
         subdirectories = [item for item in items if os.path.isdir(os.path.join(path, item))]
         # filter backup files to show only the backups in this current directory
-        files = [backup for backup in backups if backup.basename in items]
+        files = [backup for backup in backups if backup.file.path in
+                 [os.path.join(path, item) for item in items]
+                 ]
 
-    path_segments = [segment for segment in path.split('\\') if segment]
+    path_segments = [segment for segment in path.split(os.sep) if segment]  # os.sep is the path separator for the OS
 
-    # one_level_up_url = None
-    # if len(path_segments) > 1:
-    #     one_up = os.path.normpath('\\'.join(path_segments[:-1]))
-    #
-    #     if len(one_up) >= len(base_path):  # ensure the new path stays within the intended base path
-    #         one_level_up_url = reverse('backups:file_browser', kwargs={'path': one_up})
-
-    one_level_up = None
-    if len(path_segments) > 1:
-        one_up = os.path.normpath('\\'.join(path_segments[:-1]))
-
-        if len(one_up) >= len(base_path):  # ensure the new path stays within the intended base path
-            one_level_up = one_up
+    one_level_up = os.path.normpath('\\'.join(path_segments[:-1])) if len(path_segments) > 1 else None
+    # ensure the new path stays within the intended base path
+    # if the length of one_level_up is less than or equal to the length of the base path then
+    # it is no longer within the limits of the intended base path
+    if one_level_up and len(one_level_up) < len(base_path):
+        one_level_up = None
 
     clickable_path_segments = []
     for i, segment in enumerate(path_segments):
