@@ -25,36 +25,52 @@
         <div class="qfc-container">
             <section class="ribbon-container">
                 {%if user.is_authenticated %}
-                    {% if user.is_staff %} {% comment %} If user is staff, then link to the interbank page {% endcomment %}
-                        <a href="{% url 'payroll-home' %}">
-                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
-                        </a>
-                    {% else %}
-                        <a href="#">
-                            <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
-                        </a>
-                    {% endif %}
+                    <a href="#">
+                        <img src="{% static 'payroll_info/images/logo-transparent.png' %}" alt="softrite logo" class="ribbon-logo">
+                    </a>
 
                     <div class="row">
-                        <a class="plain-link plain" href="{% url 'profile' %}">
-                            <b>{{ user.username }}</b>
-                        </a>
-                        {%  if user.profile.is_company_admin and user.profile.company %}
-                            <a class="plain-link plain" href="{% url 'update_company'  user.profile.company.id %}">
-                                <b>{{ user.profile.company.code }} Info</b>
-                            </a>
+                        <div class="dropdown">
+                            <span class="dropbtn">
+                                <button class="plain-button">
+                                    <b>Profile</b>
+                                </button>
+                                <span class="dropdown-content">
+                                    <a class="plain-link plain" href="{% url 'profile' %}">
+                                        {{ user.username }}
+                                    </a>
+                                    <a class="plain-link" href="{% url 'logout' %}">Logout</a>
+                                </span>
+                            </span>
+                        </div>
+
+                        {% if user.is_staff %}
+                            <div class="dropdown">
+                                <span class="dropbtn">
+                                    <button class="plain-button">
+                                        <b>Staff</b>
+                                    </button>
+                                    <span class="dropdown-content">
+                                        <a href="{% url 'payroll-home' %}">Rates</a>
+                                        <a class="plain-link plain" href="{% url 'manage_companies' %}">
+                                            Companies
+                                        </a>
+                                    </span>
+                                </span>
+                            </div>
                         {% endif %}
+
                         {%  if user.is_staff or user.profile.is_company_admin and user.profile.company %}
-                            <a class="plain-link" href="{% url 'backups:file_browser' %}">
+                            <a class=" plain-link plain-button" href="{% url 'backups:file_browser' %}">
                                 <b>Backups Explorer</b>
                             </a>
                         {% endif %}
-                        {% if user.is_staff %}
-                            <a class="plain-link plain" href="{% url 'manage_companies' %}">
-                                <b>Companies</b>
+
+                        {%  if user.profile.is_company_admin and user.profile.company %}
+                            <a class="plain-link plain-button plain" href="{% url 'update_company' user.profile.company.id %}">
+                                <b>{{ user.profile.company.name }}</b>
                             </a>
                         {% endif %}
-                        <a class="plain-link" href="{% url 'logout' %}">Logout</a>
                     </div>
                 {% else %}
                     <div>

@@ -53,10 +53,11 @@
                 <thead>
                    <tr>
                        <th>File Name</th>
+                       <th>Size</th>
                        <th>Uploaded</th>
-                        {% if user.profile.is_company_admin or user.is_staff %}
-                            <th>Uploader</th>
-                        {% endif %}
+                       {% if user.profile.is_company_admin or user.is_staff %}
+                           <th>Uploader</th>
+                       {% endif %}
                        <th>Download</th>
                         {% if user.profile.is_company_admin or user.is_staff %}
                             <th>Delete</th>
@@ -70,6 +71,7 @@
                                 {{ backup.basename }}
                             </a>
                         </td>
+                        <td>{{ backup.filesize|filesizeformat }}</td>
                         <td>{{ backup.date_uploaded }}</td>
                         {% if user.profile.is_company_admin or user.is_staff %}
                             <td>{{ backup.user.username }}</td>

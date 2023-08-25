@@ -62,7 +62,7 @@ def remove_empty_folders(path, removeRoot=True):  # removeRoot specifies whether
     # if folder empty, delete it
     files = os.listdir(path)
     if len(files) == 0 and removeRoot:
-        logger.info(f"Removed empty dir: {path}")
+        logger.info(f"Removed empty directory: {path}")
         os.rmdir(path)
 
 
