@@ -25,6 +25,6 @@ class BackupsConfig(AppConfig):
         tz = pytz.timezone(settings.TIME_ZONE)
         # run every 2 hours
         scheduler.add_job(clean_function, 'interval', hours=2, id='clean_storage',
-                          misfire_grace_time=60,  # if the job is missed by 60 seconds, it will still run
+                          misfire_grace_time=60,  # if the job is missed within a 60-second window, it will still run
                           next_run_time=tz.localize(datetime.now()))
         scheduler.start()
