@@ -55,21 +55,38 @@
                                         <a class="plain-link plain" href="{% url 'manage_companies' %}">
                                             Companies
                                         </a>
+                                        <a class="plain-link plain" href="{% url 'backups:file_browser' %}">
+                                            Backups Explorer
+                                        </a>
                                     </span>
                                 </span>
                             </div>
                         {% endif %}
 
-                        {%  if user.is_staff or user.profile.is_company_admin and user.profile.company %}
-                            <a class=" plain-link plain-button" href="{% url 'backups:file_browser' %}">
-                                <b>Backups Explorer</b>
-                            </a>
-                        {% endif %}
+{#                        {%  if user.is_staff or user.profile.is_company_admin and user.profile.company %}#}
+{#                            <a class=" plain-link plain-button" href="{% url 'backups:file_browser' %}">#}
+{#                                <b>Backups Explorer</b>#}
+{#                            </a>#}
+{#                        {% endif %}#}
 
                         {%  if user.profile.is_company_admin and user.profile.company %}
-                            <a class="plain-link plain-button plain" href="{% url 'update_company' user.profile.company.id %}">
-                                <b>{{ user.profile.company.name }}</b>
-                            </a>
+                            <div class="dropdown">
+                                <span class="dropbtn">
+                                    <button class="plain-button">
+                                        <b>{{ user.profile.company.name }}</b>
+                                    </button>
+                                    <span class="dropdown-content">
+                                        <a class="plain-link plain" href="{% url 'update_company' user.profile.company.id %}">Info</a>
+                                        <a class="plain-link plain" href="{% url 'manage_company_users' user.profile.company.id %}">Users</a>
+                                        <a href="{% url 'backups:company_list' user.profile.company.id %}">Backups List</a>
+                                        {% if not user.is_staff %}
+                                            <a class="plain-link plain" href="{% url 'backups:file_browser' %}">
+                                                Backups Explorer
+                                            </a>
+                                        {% endif %}
+                                    </span>
+                                </span>
+                            </div>
                         {% endif %}
                     </div>
                 {% else %}

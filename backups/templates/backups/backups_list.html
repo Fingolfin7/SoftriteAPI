@@ -1,4 +1,4 @@
-{% extends 'backups/base.html' %}
+{% extends 'payroll_info/base.html' %}
 
 <!-- add this line to include the custom tag we made in the param_replace.py file -->
 {% load param_replace %}
@@ -37,6 +37,7 @@
                 <thead>
                    <tr>
                        <th>File Name</th>
+                       <th>Size</th>
                        <th>Uploaded</th>
                         {% if user.profile.is_company_admin or user.is_staff %}
                             <th>Uploader</th>
@@ -54,6 +55,7 @@
                                 {{ backup.basename }}
                             </a>
                         </td>
+                        <td>{{ backup.filesize|filesizeformat }}</td>
                         <td>{{ backup.date_uploaded }}</td>
                         {% if user.profile.is_company_admin or user.is_staff %}
                             <td>{{ backup.user.username }}</td>
