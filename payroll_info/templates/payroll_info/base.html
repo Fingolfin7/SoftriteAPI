@@ -69,7 +69,7 @@
 {#                            </a>#}
 {#                        {% endif %}#}
 
-                        {%  if user.profile.is_company_admin and user.profile.company %}
+                        {%  if user.is_staff or user.profile.is_company_admin and user.profile.company %}
                             <div class="dropdown">
                                 <span class="dropbtn">
                                     <button class="plain-button">
