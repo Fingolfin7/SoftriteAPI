@@ -31,7 +31,10 @@
             <tbody>
                 {% for acc in users %}
                     <tr>
-                        <td>{{ acc.username }}</td>
+                        <td>
+                            <img class="account-img-small" src="{{ acc.profile.image.url }}" alt="profile picture">
+                            {{ acc.username }}
+                        </td>
                         <td>{{ acc.profile.firstname }}</td>
                         <td>{{ acc.profile.lastname }}</td>
                         <td>{{ acc.email }}</td>

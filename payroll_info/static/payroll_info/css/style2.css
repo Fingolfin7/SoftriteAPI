@@ -324,6 +324,17 @@ label > input[type="file"] {
   margin-bottom: 16px;
 }
 
+.account-img-small {
+  border-radius: 50%;
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-right: 1rem;
+}
+
+td > .account-img-small{
+  vertical-align: middle;
+}
+
 .logo-img {
   width: 20%;
   margin-right: 20px;

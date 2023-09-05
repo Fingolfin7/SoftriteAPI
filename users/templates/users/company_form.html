@@ -64,14 +64,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for acc in company_accounts %}
+                        {% for profile in company_accounts %}
                             <tr>
-                                <td>{{ acc.user.username }}</td>
-                                <td>{{ acc.firstname }}</td>
-                                <td>{{ acc.lastname }}</td>
-                                <td>{{ acc.user.email }}</td>
                                 <td>
-                                    <a class="plain-link" href="{% url 'delete_user' acc.user.id %}">
+                                <img class="account-img-small" src="{{ profile.image.url }}" alt="profile picture">
+                                {{ profile.user.username }}
+                            </td>
+                                <td>{{ profile.firstname }}</td>
+                                <td>{{ profile.lastname }}</td>
+                                <td>{{ profile.user.email }}</td>
+                                <td>
+                                    <a class="plain-link" href="{% url 'delete_user' profile.user.id %}">
                                         <i class="material-icons">delete</i>
                                     </a>
                                 </td>
