@@ -314,8 +314,8 @@ def tally_used_storage(company: Company):
     associated_backups = Backup.objects.filter(company=company)
     tally = sum(backup.filesize for backup in associated_backups)
     if tally != company.used_storage:
-        logger.info(f"Updating company '{company.name}' used storage from {company.used_storage} "
-                    f"to {tally}, after tally.")
+        logger.info(f"Updating company '{company.name}' used storage from {convert_size(company.used_storage)} "
+                    f"to {convert_size(tally)}, after tally.")
         company.used_storage = tally
         company.save()
 
