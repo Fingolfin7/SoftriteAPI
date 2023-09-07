@@ -307,6 +307,19 @@ class BackupListView(LoginRequiredMixin, ListView):
         return queryset.filter(user=self.request.user)
 
 
+def tally_used_storage(company: Company):
+    """
+    Tally the total storage used by the company and update the company's used_storage field if it is not correct.
+    """
+    associated_backups = Backup.objects.filter(company=company)
+    tally = sum(backup.filesize for backup in associated_backups)
+    if tally != company.used_storage:
+        logger.info(f"Updating company '{company.name}' used storage from {company.used_storage} "
+                    f"to {tally}, after tally.")
+        company.used_storage = tally
+        company.save()
+
+
 class CompanyBackupListView(LoginRequiredMixin, ListView):
     model = Backup
     template_name = 'backups/backups_list.html'
@@ -326,7 +339,11 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().filter(company_id=int(self.kwargs['company_id']))
+
+        # while doing this, check if the total storage used by the company is correct and if not, fix it
+        company = Company.objects.get(id=int(self.kwargs['company_id']))
+        tally_used_storage(company=company)
 
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
@@ -342,7 +359,7 @@ class CompanyBackupListView(LoginRequiredMixin, ListView):
         if name:
             queryset = queryset.filter(file__icontains=name)
         # only show backups by company
-        return queryset.filter(company_id=int(self.kwargs['company_id']))
+        return queryset
 
 
 class BackupDetailView(LoginRequiredMixin, ListView):
