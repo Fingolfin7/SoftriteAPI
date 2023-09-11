@@ -33,6 +33,9 @@ class Backup(models.Model):
         return f"{self.company.name} Backup on {self.date_uploaded.strftime('%m-%d-%Y at %H:%M')}" \
                f" by {self.user.username}"
 
+    class Meta:
+        ordering = ["-date_uploaded"]
+
     @property
     def basename(self):
         return os.path.basename(self.file.name)
@@ -77,7 +80,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
     class Meta:
-        ordering = ['created']
+        ordering = ['-created']
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.created.strftime('%m-%d-%Y at %H:%M')}"
