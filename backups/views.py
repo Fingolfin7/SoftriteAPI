@@ -366,7 +366,7 @@ class BackupDetailView(LoginRequiredMixin, ListView):
     model = Comment
     template_name = 'backups/backups_detail.html'
     context_object_name = 'comments'
-    ordering = ['-created']
+    ordering = ['created']
     paginate_by = 5
 
     def get_context_data(self, **kwargs):
