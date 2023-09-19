@@ -5,7 +5,6 @@ from PIL import Image
 
 class Company(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    code = models.CharField(max_length=10, unique=True)
     address = models.CharField(max_length=100, blank=True)
     phone = models.CharField(max_length=15, blank=True)
     email = models.EmailField(max_length=254, blank=True)

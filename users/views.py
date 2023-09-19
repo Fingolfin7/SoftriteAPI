@@ -11,14 +11,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
-class HelloView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
-
-
 def register(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
@@ -161,7 +153,6 @@ class CompanyListView(LoginRequiredMixin, ListView):
         context['search_form'] = CompanySearchForm(
             initial={
                 'name': self.request.GET.get('name', ''),
-                'code': self.request.GET.get('code', ''),
             }
 
         )
@@ -171,19 +162,16 @@ class CompanyListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         name = self.request.GET.get('name')
-        code = self.request.GET.get('code')
 
         if name:
             queryset = queryset.filter(name__icontains=name)
-        if code:
-            queryset = queryset.filter(code__icontains=code)
 
         return queryset
 
 
 class CompanyCreateView(LoginRequiredMixin, CreateView):
     model = Company
-    fields = ['name', 'code', 'address', 'phone', 'email', 'website', 'logo']
+    fields = ['name', 'address', 'phone', 'email', 'website', 'logo']
     template_name = 'users/company_form.html'
 
     def get_context_data(self, **kwargs):
@@ -201,7 +189,7 @@ class CompanyCreateView(LoginRequiredMixin, CreateView):
 
 class CompanyUpdateView(LoginRequiredMixin, UpdateView):
     model = Company
-    fields = ['name', 'code', 'address', 'phone', 'email', 'website', 'logo']
+    fields = ['name', 'address', 'phone', 'email', 'website', 'logo']
     template_name = 'users/company_form.html'
     context_object_name = 'company'
 

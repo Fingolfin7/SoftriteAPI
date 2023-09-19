@@ -116,11 +116,8 @@
                     </a>
                      {% if user.profile.is_company_admin or user.is_staff and user.profile.company %}
                         <a href="{% url 'backups:company_list' user.profile.company.id %}">
-                            <button type="button">{{ user.profile.company.code }} Backups</button>
+                            <button type="button">Co. Backups</button>
                         </a>
-{#                          <a href="{% url 'backups:file_browser' %}">#}
-{#                              <button type="button">{{ user.profile.company.code }} Backups</button>#}
-{#                          </a>#}
                     {% endif %}
                 </div>
             {% else %}
@@ -134,11 +131,8 @@
                                 </button>
                             </a>
                             <a href="{% url 'backups:company_list' user.profile.company.id %}">
-                                <button type="button">{{ user.profile.company.code }} Backups</button>
+                                <button type="button">Co. Backups</button>
                             </a>
-{#                            <a href="{% url 'backups:file_browser' %}">#}
-{#                                <button type="button">{{ user.profile.company.code }} Backups</button>#}
-{#                            </a>#}
                         </div>
                     <br/>
                 {% else %}

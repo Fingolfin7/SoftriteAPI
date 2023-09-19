@@ -40,8 +40,6 @@ class UserLoginForm(AuthenticationForm):
 class CompanyForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Name', 'required': False}),
                            label="")
-    code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Code', 'required': False}),
-                           label="")
     address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Address', 'required': False}),
                               required=False, label="")
     phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Company Phone', 'required': False}),
@@ -55,7 +53,7 @@ class CompanyForm(forms.ModelForm):
 
     class Meta:
         model = Company
-        fields = ['name', 'code', 'address', 'phone', 'email', 'website', 'logo']
+        fields = ['name', 'address', 'phone', 'email', 'website', 'logo']
         help_texts = {k: "" for k in fields}
         labels = {k: "" for k in fields}
 
@@ -81,8 +79,6 @@ class UpdateProfileForm(forms.ModelForm):
 
 class CompanySearchForm(forms.Form):
     name = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Company Name'}),
-                           label="")
-    code = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Company Code'}),
                            label="")
 
 

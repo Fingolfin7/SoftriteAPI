@@ -22,8 +22,7 @@
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Code</th>
-                        <th>Backups</th>
+                        <th>Backups List</th>
                         <th>Delete</th>
                     </tr>
                 </thead>
@@ -34,13 +33,11 @@
                                 {{ com.name }}
                             </a>
                         </td>
-                        <td>{{ com.code }}</td>
                         <td>
                             <a class="plain-link" href="{% url 'backups:company_list' com.id %}">
-                                <i class="material-icons">folder open</i>
+                                <i class="material-icons">list</i>
                             </a>
-                        </td>
-                        <td>
+                        </td><td>
                             <a class="plain-link" href="{% url 'delete_company' com.id %}">
                                 <i class="material-icons">remove_circle</i>
                             </a>
@@ -95,11 +92,11 @@
             </button>
         </a>
 
-        <a class="plain-link" href="{% url 'profile' %}">
-            <button type="button">
-                <i class="material-icons">arrow_back</i>
-                Back
-            </button>
-        </a>
+{#        <a class="plain-link" href="{% url 'profile' %}">#}
+{#            <button type="button">#}
+{#                <i class="material-icons">arrow_back</i>#}
+{#                Back#}
+{#            </button>#}
+{#        </a>#}
     </span>
 {% endblock %}

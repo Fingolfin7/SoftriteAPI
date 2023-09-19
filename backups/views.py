@@ -224,7 +224,7 @@ def file_browser_view(request):
 
     path_segments = [segment for segment in path.split(os.sep) if segment]  # os.sep is the path separator for the OS
 
-    one_level_up = os.path.normpath('\\'.join(path_segments[:-1])) if len(path_segments) > 1 else None
+    one_level_up = os.path.normpath(f"{os.sep}".join(path_segments[:-1])) if len(path_segments) > 1 else None
     # ensure the new path stays within the intended base path
     # if the length of one_level_up is less than or equal to the length of the base path then
     # it is no longer within the limits of the intended base path
@@ -233,7 +233,7 @@ def file_browser_view(request):
 
     clickable_path_segments = []
     for i, segment in enumerate(path_segments):
-        segment_path = os.path.normpath('/'.join(path_segments[:i + 1]))
+        segment_path = os.path.normpath(f"{os.sep}".join(path_segments[:i + 1]))
         clickable_path_segments.append((segment, segment_path))
 
     clickable_path_segments = [seg_tuple for seg_tuple in clickable_path_segments if seg_tuple[0] not in MEDIA_ROOT]
