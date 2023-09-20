@@ -2,6 +2,7 @@ import uuid
 import os.path
 from .forms import *
 from backups.utils import *
+from urllib.parse import unquote
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse
@@ -108,7 +109,7 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
     # get comment and create a comment object
     comment = request.POST.get('comment')
     if comment and comment != '':
-        comment = Comment(user=user, backup=backup, body=comment.strip())
+        comment = Comment(user=user, backup=backup, body=unquote(comment.strip()))
         comment.save()
 
     response = HttpResponse("File uploaded successfully", status=200)
@@ -138,17 +139,6 @@ def upload(request):
     filesize = int(request.POST.get('filesize'))
     filename = request.POST.get('filename')
     file_data = request.FILES.get('file')
-
-    # username = request.POST.get('username')
-    # password = request.POST.get('password')
-    # if username and password:
-    #     user = authenticate(request, username=username, password=password)
-    #
-    #     if user is None:
-    #         delete_chunks(uploader_id)
-    #         return HttpResponse("Invalid credentials", status=HTTP_STATUS_UNAUTHORIZED)
-    # else:
-    #     user = request.user
 
     user = request.user
 
