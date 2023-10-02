@@ -1,7 +1,11 @@
 import uuid
 import os.path
+
+from django.utils import timezone
+
 from .forms import *
 from backups.utils import *
+from backups.emails import *
 from urllib.parse import unquote
 from django.contrib import messages
 from django.db import IntegrityError
@@ -19,6 +23,11 @@ HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415
 HTTP_STATUS_BAD_REQUEST = 400
 HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE = 413
 HTTP_STATUS_SERVER_ERROR = 500
+
+EMAIL_HOST_USER = 'kuda@softrite.co.zw'
+EMAIL_HOST_PASSWORD = '#E6&m]V4_U]L'
+EMAIL_HOST = 'softrite.co.zw'
+EMAIL_PORT = 465
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +70,84 @@ def process_final_file_path(user, request):
     final_file_path = os.path.join(MEDIA_ROOT, final_file_path)
     os.makedirs(os.path.dirname(final_file_path), exist_ok=True)  # Create the directory if it doesn't exist
     return get_available_name(final_file_path)
+
+
+def send_backup_complete_email(users_list: list|set, backup: Backup):
+    # Make sure backup.date_uploaded is timezone aware
+    backup_date_uploaded = timezone.localtime(backup.date_uploaded)
+
+    formatted_date = backup_date_uploaded.strftime("%A %d %B, %Y at %H:%M")
+
+    # get the first comment if it exists
+    comment = backup.comment_set.first().body if backup.comment_set.exists() else ""
+
+    mailMan = Mailer(my_email=EMAIL_HOST_USER, my_password=EMAIL_HOST_PASSWORD, smtp_server=EMAIL_HOST, port=EMAIL_PORT)
+    mailMan.sendHtmlEmail(to_email=[user.email for user in users_list], subject='Backup Complete',
+                          html_content=f'''
+                           <!DOCTYPE html>
+                           <html>
+                               <head>
+                                   <title>Backup Upload Complete</title>
+                                   <style>
+                                       body {{
+                                           font-family: Arial, sans-serif;
+                                           background-color: #f2f2f2;
+                                       }}
+                                       .container {{
+                                           margin: 0 auto;
+                                           max-width: 600px;
+                                           padding: 20px;
+                                           background-color: #fff;
+                                           border-radius: 10px;
+                                           box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                                       }}
+                                       h1 {{
+                                           color: #0072c6;
+                                           font-size: 36px;
+                                           margin-bottom: 20px;
+                                       }}
+                                       img {{
+                                           max-width: 100%;
+                                           height: auto;
+                                           margin-bottom: 20px;
+                                       }}
+                                       .center-img {{
+                                           display: block;
+                                           margin-left: auto;
+                                           margin-right: auto;
+                                       }}
+                                   </style>
+
+                               </head> 
+                               <body> 
+                                   <div class="container"> 
+                                       <img src="https://adaski.co.zw/static/payroll_info/images/logo-transparent.png" alt="Adaski Logo" class="center-img">
+                                       <h1>Backup Upload Complete</h1> 
+                                       <p>Your backup upload is complete. You can view your backup on the <a href="https://adaski.co.zw/">Adaski</a> website.</p> 
+                                       <p>Backup Name: <b>{backup.basename}</b></p>
+                                       <p>Backup Date: <b>{formatted_date}</b></p>
+                                       <p>Uploaded by: <b>{backup.user.username}</b></p>
+
+                                       {"<p>Backup Comment: <b>" + comment + "</b>" if comment != "" else ""}
+
+                                       <p>Thank you for using Softrite.</p>
+                                   </div>
+                               </body>
+                           </html>
+                           '''
+                          )
+
+    log_message = "Sent backup complete email to "
+    for i, to_user in enumerate(users_list):
+        if i != len(users_list) - 1:
+            log_message += f"{to_user.email} ({to_user.username})"
+            log_message += ", "
+        else:
+            log_message += f"and {to_user.email} ({to_user.username})"
+            log_message += f" from {to_user.profile.company.name} for backup '{backup.basename}' successfully."
+
+    logger.info(log_message)
+
 
 
 def handle_uploaded_file(request, uploader_id, total_chunks, user):
@@ -115,7 +202,13 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
     response = HttpResponse("File uploaded successfully", status=200)
     response.set_cookie('uploader_id', uploader_id, httponly=True)
     logger.info(f"User '{user.username}' ({user.profile.company.name}) uploaded file '{backup.basename}' successfully.")
-    print(response.content)
+
+    # send backup complete email
+    users_list = set([user] + list(User.objects.filter(profile__is_company_admin=True,
+                                                       profile__company=user.profile.company)))
+
+    send_backup_complete_email(users_list, backup)
+
     return response
 
 
