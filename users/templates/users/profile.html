@@ -2,6 +2,7 @@
 {% load crispy_forms_filters %}
 {% load crispy_forms_tags %}
 {% block content %}
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <form  method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="image image4"></div>
@@ -21,6 +22,30 @@
                     Upload Image
                     {{ profile_form.image }}
                 </label>
+                <script>
+                    // Add the selected file name to the label so that the user can preview it
+                    $('#id_image').on('change',function(){
+                        //get the file name
+                        let fileName = $(this).val().split('\\').pop();
+
+                        // change the image preview
+                        if (this.files && this.files[0]) {
+                            let reader = new FileReader();
+
+                            reader.onload = function (e) {
+                                $('.account-img').attr('src', e.target.result);
+                            }
+                            reader.readAsDataURL(this.files[0]);
+                        }
+
+                        //replace the "Choose a file" label
+                        $(this).next('.custom-file-upload').html('<i class="material-icons">cloud_upload</i> '
+                            + fileName
+                            + '{{ profile_form.image }}'
+                        );
+                    })
+
+                </script>
             </span>
 
             <h5>Information</h5>

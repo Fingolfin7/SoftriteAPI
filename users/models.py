@@ -1,6 +1,10 @@
+import os
+
 from django.db import models
 from django.contrib.auth.models import User
-from PIL import Image
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from io import BytesIO
+from PIL import Image, ImageSequence
 
 
 class Company(models.Model):
@@ -43,9 +47,60 @@ class Profile(models.Model):
         return f"{self.user.username} Profile"
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        img = Image.open(self.image.path)
-        if img.height > 300 or img.width > 300:
-            output_size = (300, 300)
-            img.thumbnail(output_size)
+        img = Image.open(self.image)
+        if img.format == 'GIF':
+            self.image = self.resize_gif(img)
+
+        elif img.height > 450 or img.width > 450:
+            img_width = img.size[0] if img.size[0] < 450 else 450
+            img_height = img.size[1] if img.size[1] < 450 else 450
+
+            output_size = (img_width, img_height)
+            img.thumbnail(output_size, Image.ANTIALIAS)
             img.save(self.image.path)
+
+        super().save(*args, **kwargs)
+
+    def resize_gif(self, img):
+        """
+        Resize a gif image by resizing each frame and then reassembling the frames into a new gif
+        """
+        frame_width = img.size[0] if img.size[0] < 450 else 450
+        frame_height = img.size[1] if img.size[1] < 450 else 450
+
+        frames = []
+        durations = []  # Store frame durations
+        disposal_methods = []  # Store disposal methods
+
+        for frame in ImageSequence.Iterator(img):
+            # Resize the frame
+            frame = frame.resize((frame_width, frame_height), Image.ANTIALIAS)
+
+            # Extract and store the frame duration and disposal method
+            durations.append(frame.info.get("duration", 100))  # Default duration is 100 ms
+            disposal_methods.append(frame.info.get("disposal_method", 0))  # Default disposal method is 0
+
+            frames.append(frame)
+
+        # Create a new GIF with frame durations and disposal methods
+        with BytesIO() as output_buffer:
+            frames[0].save(
+                output_buffer,
+                format="GIF",
+                save_all=True,
+                append_images=frames[1:],
+                duration=durations,
+                disposal=disposal_methods,
+                loop=0,  # Specify the loop count (0 means infinite loop)
+            )
+
+            buffer = BytesIO(output_buffer.getvalue())
+
+        return InMemoryUploadedFile(
+            buffer,
+            'ImageField',
+            os.path.join(self.image.path, "%s.gif" % self.image.name.split('.')[0]),
+            'image/gif',
+            buffer.getbuffer().nbytes,
+            None
+        )
