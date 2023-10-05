@@ -41,7 +41,7 @@ class BackupsConfig(AppConfig):
             logger.info(f"All Images in {log_text_path}:  {len(all_images)}")
 
             for image_path in unreferenced_images:
-                logger.info("Deleting unreferenced image: {image_path}")
+                logger.info(f"Deleting unreferenced image: {image_path}")
                 os.remove(image_path)
 
         def clean_function():
