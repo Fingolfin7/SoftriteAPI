@@ -1,5 +1,4 @@
 import os
-
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -47,11 +46,14 @@ class Profile(models.Model):
         return f"{self.user.username} Profile"
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         img = Image.open(self.image)
+
         if img.format == 'GIF':
+            # trying to trigger the save method of the image field so that django_cleanups can clean up the old image
             self.image = self.resize_gif(img)
 
-        elif img.height > 450 or img.width > 450:
+        elif img.format != 'GIF' and (img.height > 450 or img.width > 450):
             img_width = img.size[0] if img.size[0] < 450 else 450
             img_height = img.size[1] if img.size[1] < 450 else 450
 
@@ -59,14 +61,17 @@ class Profile(models.Model):
             img.thumbnail(output_size, Image.ANTIALIAS)
             img.save(self.image.path)
 
-        super().save(*args, **kwargs)
 
     def resize_gif(self, img):
         """
         Resize a gif image by resizing each frame and then reassembling the frames into a new gif
         """
+
         frame_width = img.size[0] if img.size[0] < 450 else 450
         frame_height = img.size[1] if img.size[1] < 450 else 450
+
+        if frame_width == img.size[0] and frame_height == img.size[1]: # if the image is already the correct size
+            return self.image
 
         frames = []
         durations = []  # Store frame durations
@@ -91,7 +96,7 @@ class Profile(models.Model):
                 append_images=frames[1:],
                 duration=durations,
                 disposal=disposal_methods,
-                loop=0,  # Specify the loop count (0 means infinite loop)
+                loop=img.info.get("loop", 0)  # Copy the loop count from the original
             )
 
             buffer = BytesIO(output_buffer.getvalue())
@@ -99,7 +104,7 @@ class Profile(models.Model):
         return InMemoryUploadedFile(
             buffer,
             'ImageField',
-            os.path.join(self.image.path, "%s.gif" % self.image.name.split('.')[0]),
+            os.path.normpath(self.image.path),
             'image/gif',
             buffer.getbuffer().nbytes,
             None
