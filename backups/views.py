@@ -86,7 +86,6 @@ def send_backup_complete_email(users_list: list | set, backup: Backup):
                                    <style>
                                        body {{
                                            font-family: Arial, sans-serif;
-                                           background-color: #f2f2f2;
                                        }}
                                        .container {{
                                            margin: 0 auto;
@@ -205,6 +204,7 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
     users_list += list(User.objects.filter(profile__is_company_admin=True,  # include company admins
                                            profile__get_backup_emails=True,  # don't include profiles that have False
                                            profile__company=user.profile.company))
+    users_list = set(users_list)  # remove duplicates (if any)
 
     send_backup_complete_email(users_list, backup)
 
