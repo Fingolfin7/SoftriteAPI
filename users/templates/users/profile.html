@@ -55,12 +55,9 @@
                     <tr>
                         {% if user.profile.company %}
                             <td>
-                                <b>Company:</b>  {{ user.profile.company.name }}
+                                <b>Company: </b>  {{ user.profile.company.name }}
                             </td>
                         {% endif %}
-                        <td>
-                            <b>Email:</b> {{ user.email }}
-                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -72,15 +69,23 @@
             {# Continue with the visible fields #}
             <br/>
             <span class="flex-row">
-                <b>Firstname:</b> {{ profile_form.firstname }}
+                <b>First name:</b> {{ user_form.first_name }}
             </span>
             <br/>
             <span class="flex-row">
-                <b>Lastname:</b> {{ profile_form.lastname }}
+                <b>Last name:</b> {{ user_form.last_name }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Email:</b> {{ user_form.email }}
             </span>
             <br/>
             <span class="flex-row">
                 <b>Phone:</b> {{ profile_form.phone }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Receive backup notifications:</b> {{ profile_form.get_backup_emails }}
             </span>
             <br/>
 

@@ -22,7 +22,7 @@ class BackupsConfig(AppConfig):
         def cleanup_media_folder():
             """
             I noticed that sometimes when a user uploads a gif as a profile pic, the old profile pic is not deleted.
-            This function will delete all unreferenced images in the profile_pics folder. (its only temporary while i
+            This function will delete all unreferenced images in the profile_pics folder. (its only temporary while I
             figure out why the old profile pic is not deleted)
             """
             referenced_images = [os.path.normpath(os.path.join(MEDIA_ROOT, profile.image.name)) for profile in
@@ -34,7 +34,7 @@ class BackupsConfig(AppConfig):
 
             log_text_path = f"{os.sep}".join(os.path.normpath(media_folder).split(os.sep)[-2:])
 
-            # Step 3: Identify unreferenced images
+            # get the set difference to find unreferenced images
             unreferenced_images = set(all_images) - set(referenced_images)
 
             logger.info(f"Unreferenced Images in {log_text_path}: {len(unreferenced_images)}")

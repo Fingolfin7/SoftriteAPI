@@ -24,11 +24,6 @@ HTTP_STATUS_BAD_REQUEST = 400
 HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE = 413
 HTTP_STATUS_SERVER_ERROR = 500
 
-EMAIL_HOST_USER = os.environ.get('SMTP_USERNAME')
-EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD')
-EMAIL_HOST = 'softrite.co.zw'
-EMAIL_PORT = 465
-
 logger = logging.getLogger(__name__)
 
 
@@ -72,7 +67,7 @@ def process_final_file_path(user, request):
     return get_available_name(final_file_path)
 
 
-def send_backup_complete_email(users_list: list|set, backup: Backup):
+def send_backup_complete_email(users_list: list | set, backup: Backup):
     # Make sure backup.date_uploaded is timezone aware
     backup_date_uploaded = timezone.localtime(backup.date_uploaded)
 
@@ -137,6 +132,9 @@ def send_backup_complete_email(users_list: list|set, backup: Backup):
                            '''
                           )
 
+    # close the mailer connection
+    mailMan.close_connection()
+
     log_message = "Sent backup complete email to "
     for i, to_user in enumerate(users_list):
         if i != len(users_list) - 1:
@@ -147,7 +145,6 @@ def send_backup_complete_email(users_list: list|set, backup: Backup):
             log_message += f" from {to_user.profile.company.name} for backup '{backup.basename}' successfully."
 
     logger.info(log_message)
-
 
 
 def handle_uploaded_file(request, uploader_id, total_chunks, user):
@@ -204,8 +201,10 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
     logger.info(f"User '{user.username}' ({user.profile.company.name}) uploaded file '{backup.basename}' successfully.")
 
     # send backup complete email
-    users_list = set([user] + list(User.objects.filter(profile__is_company_admin=True,
-                                                       profile__company=user.profile.company)))
+    users_list = [user] if user.profile.get_backup_emails else []
+    users_list += list(User.objects.filter(profile__is_company_admin=True,  # include company admins
+                                           profile__get_backup_emails=True,  # don't include profiles that have False
+                                           profile__company=user.profile.company))
 
     send_backup_complete_email(users_list, backup)
 

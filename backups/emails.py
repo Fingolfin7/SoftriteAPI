@@ -7,6 +7,11 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 
+EMAIL_HOST_USER = os.environ.get('SMTP_USERNAME')
+EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD')
+EMAIL_HOST = 'softrite.co.zw'
+EMAIL_PORT = 465
+
 
 class Mailer:
     def __init__(self, my_email="", my_password="", smtp_server="", port=465):

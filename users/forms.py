@@ -29,6 +29,21 @@ class UserRegisterForm(UserCreationForm):
         # labels = {k: "" for k in fields}
 
 
+class UserUpdateForm(forms.ModelForm):
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name', 'required': False}),
+                                 label="", required=False)
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name', 'required': False}),
+                                label="", required=False)
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email'}),
+                             label="")
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        help_texts = {k: "" for k in fields}
+        labels = {k: "" for k in fields}
+
+
 class UserLoginForm(AuthenticationForm):
     username = UsernameField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'width-100'}),
                              label="")
@@ -61,18 +76,14 @@ class CompanyForm(forms.ModelForm):
 class UpdateProfileForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput(), required=False)
     is_company_admin = forms.BooleanField(required=False, label="")
+    get_backup_emails = forms.BooleanField(required=False, label="")
     company = forms.ModelChoiceField(queryset=Company.objects.all(), required=False, label="")  # select a company
-    # from the list of all companies
-    firstname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}), required=False,
-                                label="")
-    lastname = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False,
-                               label="")
     phone = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Phone Number'}), required=False,
                             label="")
 
     class Meta:
         model = Profile
-        fields = ['image', 'is_company_admin', 'firstname', 'lastname', 'phone']
+        fields = ['image', 'phone', 'is_company_admin', 'get_backup_emails']
         help_texts = {k: "" for k in fields}
         labels = {k: "" for k in fields}
 

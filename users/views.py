@@ -1,4 +1,6 @@
+import logging
 from .forms import *
+from backups.emails import *
 from backups.models import Backup
 from django.contrib import messages
 from django.urls import reverse
@@ -6,9 +8,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+
+logger = logging.getLogger(__name__)
 
 
 def register(request):
@@ -57,22 +58,94 @@ def login(request):
 @login_required
 def profile(request):
     if request.method == "POST":
+        user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
         profile_form.fields['is_company_admin'].disabled = True
-        if profile_form.is_valid():
 
+        if profile_form.is_valid() and user_form.is_valid():
+            user_form.save()
             profile_form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile')
         else:
             messages.error(request, 'Error updating profile. Please try again.')
     else:
+        user_form = UserUpdateForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
     backups = Backup.objects.filter(user=request.user).order_by('-date_uploaded')[0:5]  # get the 5 most recent backups
-    return render(request, 'users/profile.html', {'profile_form': profile_form,
-                                                  'title': 'Profile',
-                                                  'backups': backups})
+    return render(request, 'users/profile.html',
+                  {
+                      'user_form': user_form,
+                      'profile_form': profile_form,
+                      'title': 'Profile',
+                      'backups': backups
+                  })
+
+
+def send_new_user_credentials(user, password: str):
+    mailMan = Mailer(my_email=EMAIL_HOST_USER, my_password=EMAIL_HOST_PASSWORD, smtp_server=EMAIL_HOST, port=EMAIL_PORT)
+    mailMan.sendHtmlEmail(to_email=user.email, subject="Adaski Account Credentials",
+                          html_content=f"""
+                            <!DOCTYPE html>
+                            <html>
+                                <head>
+                                    <meta charset="utf-8">
+                                    <title>Adaski Account Credentials</title>
+                                    <style>
+                                       body {{
+                                           font-family: Arial, sans-serif;
+                                       }}
+                                       .container {{
+                                           margin: 0 auto;
+                                           max-width: 600px;
+                                           padding: 20px;
+                                           background-color: #fff;
+                                           border-radius: 10px;
+                                           box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                                       }}
+                                       h1 {{
+                                           color: #0072c6;
+                                           font-size: 36px;
+                                           margin-bottom: 20px;
+                                       }}
+                                   </style>
+                                </head>
+                                <body>
+                                    <h1>
+                                    Hi {user.first_name if user.first_name and
+                                                           user.first_name != "" else user.username} 👋,
+                                    </h1>
+                                    
+                                    <br/>
+                                    
+                                    <p>
+                                         Your Adaski {'Admin ' if user.profile.is_company_admin else ''}account,
+                                         with company <em>{user.profile.company.name}</em> has been created.
+                                          
+                                         <br/>
+                                         <br/>
+                                         
+                                         You can log in <a href="https://adaski.co.zw/login/">here</a> 
+                                         using the following credentials:  
+                                    </p>
+                                     
+                                    <p>Username: <b>{user.username}</b></p>
+                                    <p>Password: <b>{password}</b></p>
+                                    
+                                    <p>
+                                        Kind regards,
+                                        <br/>
+                                        <em>Softrite</em>
+                                    </p>
+                                </body>
+                            </html>
+                          """
+                          )
+    # close the mailer connection
+    mailMan.close_connection()
+
+    logger.info(f"New user credentials sent to {user.username}({user.email}) from {user.profile.company.name}")
 
 
 @login_required
@@ -82,6 +155,8 @@ def create_new_users(request):
         profile_form = UpdateProfileForm(request.POST)
 
         if user_form.is_valid():
+            # get the email and username from the form
+            password = user_form.cleaned_data['password1']
             created_user = user_form.save()
             profile_form.instance = created_user.profile
 
@@ -97,6 +172,9 @@ def create_new_users(request):
                 # save the company selected in the profile form to the user's profile separately
                 created_user.profile.company = company
                 created_user.profile.save()
+
+                # send the new user an email with their credentials
+                send_new_user_credentials(created_user, password)
 
                 messages.success(request, f'{created_user.username} created successfully.')
                 return redirect('create_new_users')
@@ -197,7 +275,8 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Update Company Information'
         context['form'] = CompanyForm(instance=self.get_object())
-        context['company_accounts'] = Profile.objects.filter(company=self.get_object()).exclude(user=self.request.user)[0:5]
+        context['company_accounts'] = Profile.objects.filter(company=self.get_object()).exclude(user=self.request.user)[
+                                      0:5]
         return context
 
     def get_object(self, queryset=None):
@@ -230,4 +309,3 @@ class CompanyDeleteView(LoginRequiredMixin, DeleteView):
 
 def download_adaski(request):
     return render(request, 'users/download_adaski.html', {'title': 'Download Adaski'})
-

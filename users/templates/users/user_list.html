@@ -35,8 +35,8 @@
                             <img class="account-img-small" src="{{ acc.profile.image.url }}" alt="profile picture">
                             {{ acc.username }}
                         </td>
-                        <td>{{ acc.profile.firstname }}</td>
-                        <td>{{ acc.profile.lastname }}</td>
+                        <td>{{ acc.first_name }}</td>
+                        <td>{{ acc.last_name }}</td>
                         <td>{{ acc.email }}</td>
                         <td>
                             <a class="plain-link" href="{% url 'delete_user' acc.id %}">

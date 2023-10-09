@@ -35,12 +35,10 @@ class Company(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
-    is_company_admin = models.BooleanField(default=False)  # company admin can add users to the company
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
-    firstname = models.CharField(max_length=100, default='', blank=True)
-    lastname = models.CharField(max_length=100, default='', blank=True)
     phone = models.CharField(max_length=15, default='', blank=True)
-    # email = models.EmailField(max_length=254) # this is already in the User model
+    is_company_admin = models.BooleanField(default=False)  # company admin can add users to the company
+    get_backup_emails = models.BooleanField(default=True)  # whether to get backup emails or not
 
     def __str__(self):
         return f"{self.user.username} Profile"
