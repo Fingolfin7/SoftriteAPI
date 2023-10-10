@@ -11,11 +11,16 @@
 
         <div class="flex-row">
             <input type="submit" class="button" id="login" value="login">
+            <small class="form-text text-muted">
+                <a href="{% url 'password_reset' %}">Forgot Password?</a>
+            </small>
 {#            <a class="button-link" id="signup-btn" href="{% url 'register' %}">#}
 {#                <button type="button">#}
 {#                    Signup#}
 {#                </button>#}
 {#            </a>#}
         </div>
+   <br/>
+   <br/>
    </form>
 {% endblock %}

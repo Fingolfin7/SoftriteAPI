@@ -222,3 +222,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10  # 10MB
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'softrite.co.zw'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.environ.get('SMTP_USERNAME')
+EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

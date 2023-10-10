@@ -3,6 +3,7 @@ import os.path
 
 from django.utils import timezone
 
+from SoftriteAPI.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_HOST, EMAIL_PORT
 from .forms import *
 from backups.utils import *
 from backups.emails import *
