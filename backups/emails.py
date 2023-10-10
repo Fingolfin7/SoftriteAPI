@@ -7,12 +7,6 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 
 
-# EMAIL_HOST_USER = os.environ.get('SMTP_USERNAME')
-# EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD')
-# EMAIL_HOST = 'softrite.co.zw'
-# EMAIL_PORT = 465
-
-
 class Mailer:
     def __init__(self, my_email="", my_password="", smtp_server="", port=465):
         self.my_email = my_email
@@ -96,9 +90,7 @@ class Mailer:
 
 
 if __name__ == '__main__':
-    # from SoftriteAPI.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_HOST, EMAIL_PORT
-    # my_email = "Test Email"
-    #
+
     # mailMan = Mailer(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_HOST, EMAIL_PORT)
     # mailMan.sendPlainTextEmail(to_email="mushunjek@gmail.com", subject="Test Email", content="This is a test email")
     # mailMan.close_connection()

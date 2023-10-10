@@ -11,3 +11,4 @@ django-cleanup
 pytz
 urllib3
 djangorestframework
+django-environ

@@ -1,6 +1,5 @@
 import logging
 from .forms import *
-from SoftriteAPI.settings import *
 from backups.emails import *
 from backups.models import Backup
 from django.contrib import messages
@@ -58,8 +57,6 @@ def login(request):
 
 @login_required
 def profile(request):
-    logger.info(f"Email host user value: {EMAIL_HOST_USER}")
-
     if request.method == "POST":
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
