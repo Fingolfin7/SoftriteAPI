@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
 from . import views
@@ -11,7 +11,9 @@ urlpatterns = [
                                                 authentication_form=UserLoginForm), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
 
-    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='users/password_reset.html',
+                                                                 html_email_template_name='users/Email Password Reset Template.html',
+         success_url=reverse_lazy('password_reset_done')),
          name='password_reset'),
 
     path('password-reset/done/ ',
