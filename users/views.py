@@ -1,9 +1,12 @@
 import logging
 from .forms import *
-from backups.emails import *
+from SoftriteAPI.settings import EMAIL_HOST_USER
 from backups.models import Backup
 from django.contrib import messages
 from django.urls import reverse
+from django.core.mail import send_mail
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -30,7 +33,7 @@ def register(request):
 class delete_user(LoginRequiredMixin, DeleteView):
     model = User
     template_name = 'users/user_confirm_delete.html'
-    success_url = 'create_new_users'
+    success_url = 'profile'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,67 +87,17 @@ def profile(request):
 
 
 def send_new_user_credentials(user, password: str):
-    mailMan = Mailer(my_email=EMAIL_HOST_USER, my_password=EMAIL_HOST_PASSWORD, smtp_server=EMAIL_HOST, port=EMAIL_PORT)
-    mailMan.sendHtmlEmail(to_email=user.email, subject="Adaski Account Credentials",
-                          html_content=f"""
-                            <!DOCTYPE html>
-                            <html>
-                                <head>
-                                    <meta charset="utf-8">
-                                    <title>Adaski Account Credentials</title>
-                                    <style>
-                                       body {{
-                                           font-family: Arial, sans-serif;
-                                       }}
-                                       .container {{
-                                           margin: 0 auto;
-                                           max-width: 600px;
-                                           padding: 20px;
-                                           background-color: #fff;
-                                           border-radius: 10px;
-                                           box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-                                       }}
-                                       h1 {{
-                                           color: #0072c6;
-                                           font-size: 36px;
-                                           margin-bottom: 20px;
-                                       }}
-                                   </style>
-                                </head>
-                                <body>
-                                    <h1>
-                                    Hi {user.first_name if user.first_name and
-                                                           user.first_name != "" else user.username} 👋,
-                                    </h1>
-                                    
-                                    <br/>
-                                    
-                                    <p>
-                                         Your Adaski {'Admin ' if user.profile.is_company_admin else ''}account,
-                                         with company <em>{user.profile.company.name}</em> has been created.
-                                          
-                                         <br/>
-                                         <br/>
-                                         
-                                         You can log in <a href="https://adaski.co.zw/login/">here</a> 
-                                         using the following credentials:  
-                                    </p>
-                                     
-                                    <p>Username: <b>{user.username}</b></p>
-                                    <p>Password: <b>{password}</b></p>
-                                    
-                                    <p>
-                                        Kind regards,
-                                        <br/>
-                                        <em>Softrite</em>
-                                    </p>
-                                </body>
-                            </html>
-                          """
-                          )
-    # close the mailer connection
-    mailMan.close_connection()
+    html_body = render_to_string('users/Email Account Credentials Template.html', {'user': user, 'password': password})
+    plain_text_body = strip_tags(html_body)
 
+
+    send_mail(
+        subject='Adaski Account Credentials',
+        message=plain_text_body,
+        html_message=html_body,
+        from_email=EMAIL_HOST_USER,
+        recipient_list=[user.email],
+    )
     logger.info(f"New user credentials sent to {user.username}({user.email}) from {user.profile.company.name}")
 
 
@@ -306,6 +259,3 @@ class CompanyDeleteView(LoginRequiredMixin, DeleteView):
         messages.success(self.request, 'Company deleted successfully.')
         return super().delete(request, *args, **kwargs)
 
-
-def download_adaski(request):
-    return render(request, 'users/download_adaski.html', {'title': 'Download Adaski'})

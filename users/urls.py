@@ -6,7 +6,6 @@ from .forms import UserLoginForm
 
 urlpatterns = [
     path('', views.profile, name='profile'),
-    path('get_adaski/', views.download_adaski, name='adaski'),
     path('get-auth-token/', obtain_auth_token, name='get-auth-token'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html',
                                                 authentication_form=UserLoginForm), name='login'),

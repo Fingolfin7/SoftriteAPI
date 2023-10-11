@@ -8,22 +8,32 @@
         <span class="section-header">Create User</span>
         <section id="user-object-create">
             <span class="flex-row">
-                <b>Username:</b> {{ user_form.username }}
+                <b>Username:*</b> {{ user_form.username }}
                 {{ user_form.username.errors }}
             </span>
             <br/>
             <span class="flex-row">
-                <b>Email:</b> {{ user_form.email }}
+                <b>Email:*</b> {{ user_form.email }}
                 {{ user_form.email.errors }}
             </span>
             <br/>
             <span class="flex-row">
-                <b>Password: </b> {{ user_form.password1 }}
+                <b>First name:</b> {{ user_form.first_name }}
+                {{ user_form.first_name.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Last name:</b> {{ user_form.last_name }}
+                {{ user_form.last_name.errors }}
+            </span>
+            <br/>
+            <span class="flex-row">
+                <b>Password:* </b> {{ user_form.password1 }}
                 {{ user_form.password1.errors }}
             </span>
             <br/>
             <span class="flex-row">
-                <b>Confirm Password: </b> {{ user_form.password2 }}
+                <b>Confirm Password:* </b> {{ user_form.password2 }}
                 {{ user_form.password2.errors }}
             </span>
             <br/>
@@ -37,20 +47,11 @@
                 </span>
                 <br/>
                 <span class="flex-row">
-                    <b>Company:</b> {{ profile_form.company }}
+                    <b>Company:*</b> {{ profile_form.company }}
                     {{ profile_form.company.errors }}
                 </span>
                 <br>
             {% endif %}
-            <span class="flex-row">
-                <b>Firstname:</b> {{ profile_form.firstname }}
-                {{ profile_form.firstname.errors }}
-            </span>
-            <br/>
-            <span class="flex-row">
-                <b>Lastname:</b> {{ profile_form.lastname }}
-                {{ profile_form.lastname.errors }}
-            </span>
             <br/>
             <span class="flex-row">
                 <b>Phone:</b> {{ profile_form.phone }}

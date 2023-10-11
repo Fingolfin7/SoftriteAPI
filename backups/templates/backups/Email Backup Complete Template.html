@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Backup Upload Complete</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin: 0 auto;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #0072c6;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .center-img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+     <div class="container">
+         <img src="https://adaski.co.zw/static/payroll_info/images/logo-transparent.png" alt="Adaski Logo" class="center-img">
+         <h1>Backup Upload Complete</h1>
+         <p>Your backup upload is complete. You can view your backup on the <a href="https://adaski.co.zw/">Adaski</a> website.</p>
+         <p>Backup Name: <b>{{ backup.basename }}</b></p>
+         <p>Backup Date: <b>{{ formatted_date }}</b></p>
+         <p>Uploaded by: <b>{{ backup.user.username }}</b></p>
+
+         {% if comment %}
+            <p>Backup Comment: <b>{{ comment }}</b></p>
+         {% endif %}
+
+
+         <p>Thank you for using Softrite.</p>
+     </div>
+</body>
+</html>

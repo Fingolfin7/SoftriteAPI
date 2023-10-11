@@ -1,17 +1,17 @@
 import uuid
 import os.path
-
 from django.utils import timezone
-
-from SoftriteAPI.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_HOST, EMAIL_PORT
+from SoftriteAPI.settings import EMAIL_HOST_USER
 from .forms import *
 from backups.utils import *
-from backups.emails import *
 from urllib.parse import unquote
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from django.core.mail import send_mail
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -77,63 +77,20 @@ def send_backup_complete_email(users_list: list | set, backup: Backup):
     # get the first comment if it exists
     comment = backup.comment_set.first().body if backup.comment_set.exists() else ""
 
-    mailMan = Mailer(my_email=EMAIL_HOST_USER, my_password=EMAIL_HOST_PASSWORD, smtp_server=EMAIL_HOST, port=EMAIL_PORT)
-    mailMan.sendHtmlEmail(to_email=[user.email for user in users_list], subject='Backup Complete',
-                          html_content=f'''
-                           <!DOCTYPE html>
-                           <html>
-                               <head>
-                                   <title>Backup Upload Complete</title>
-                                   <style>
-                                       body {{
-                                           font-family: Arial, sans-serif;
-                                       }}
-                                       .container {{
-                                           margin: 0 auto;
-                                           max-width: 600px;
-                                           padding: 20px;
-                                           background-color: #fff;
-                                           border-radius: 10px;
-                                           box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-                                       }}
-                                       h1 {{
-                                           color: #0072c6;
-                                           font-size: 36px;
-                                           margin-bottom: 20px;
-                                       }}
-                                       img {{
-                                           max-width: 100%;
-                                           height: auto;
-                                           margin-bottom: 20px;
-                                       }}
-                                       .center-img {{
-                                           display: block;
-                                           margin-left: auto;
-                                           margin-right: auto;
-                                       }}
-                                   </style>
+    html_body = render_to_string('backups/Email Backup Complete Template.html', {'backup': backup,
+                                                                                 'formatted_date': formatted_date,
+                                                                                 'comment': comment})
 
-                               </head> 
-                               <body> 
-                                   <div class="container"> 
-                                       <img src="https://adaski.co.zw/static/payroll_info/images/logo-transparent.png" alt="Adaski Logo" class="center-img">
-                                       <h1>Backup Upload Complete</h1> 
-                                       <p>Your backup upload is complete. You can view your backup on the <a href="https://adaski.co.zw/">Adaski</a> website.</p> 
-                                       <p>Backup Name: <b>{backup.basename}</b></p>
-                                       <p>Backup Date: <b>{formatted_date}</b></p>
-                                       <p>Uploaded by: <b>{backup.user.username}</b></p>
+    plain_text_body = strip_tags(html_body)  # show a plain text version of the email body
+    # for email clients that don't support html
 
-                                       {"<p>Backup Comment: <b>" + comment + "</b>" if comment != "" else ""}
-
-                                       <p>Thank you for using Softrite.</p>
-                                   </div>
-                               </body>
-                           </html>
-                           '''
-                          )
-
-    # close the mailer connection
-    mailMan.close_connection()
+    send_mail(
+        subject=f"Backup '{backup.basename}' uploaded successfully",
+        message=plain_text_body,
+        html_message=html_body,
+        from_email=EMAIL_HOST_USER,
+        recipient_list=[user.email for user in users_list],
+    )
 
     log_message = "Sent backup complete email to "
     for i, to_user in enumerate(users_list):

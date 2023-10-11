@@ -5,6 +5,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from io import BytesIO
 from PIL import Image, ImageSequence
 
+# make the email field for the user model unique
+User._meta.get_field('email')._unique = True
+
 
 class Company(models.Model):
     name = models.CharField(max_length=100, unique=True)
