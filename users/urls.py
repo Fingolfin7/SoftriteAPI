@@ -4,6 +4,8 @@ from rest_framework.authtoken.views import obtain_auth_token
 from . import views
 from .forms import UserLoginForm
 
+
+
 urlpatterns = [
     path('', views.profile, name='profile'),
     path('get-auth-token/', obtain_auth_token, name='get-auth-token'),
@@ -13,8 +15,10 @@ urlpatterns = [
 
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='users/password_reset.html',
                                                                  html_email_template_name='users/Email Password Reset Template.html',
+                                                                 subject_template_name='users/password_reset_subject.txt',
          success_url=reverse_lazy('password_reset_done')),
          name='password_reset'),
+    # ref: https://docs.djangoproject.com/en/3.0/topics/auth/default/#django.contrib.auth.views.PasswordResetView
 
     path('password-reset/done/ ',
          auth_views.PasswordResetDoneView.as_view(template_name='users/password_reset_done.html'),
