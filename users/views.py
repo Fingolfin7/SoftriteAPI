@@ -1,4 +1,7 @@
 import logging
+
+from rest_framework.permissions import IsAuthenticated
+
 from .forms import *
 from SoftriteAPI.settings import EMAIL_HOST_USER
 from backups.models import Backup
@@ -6,6 +9,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 from django.template.loader import render_to_string
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -13,6 +19,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 logger = logging.getLogger(__name__)
+
+
+@api_view(['GET'])
+def check_auth_token(request, token):
+    try:
+        # Retrieve the token object from the database
+        token_obj = Token.objects.get(key=token)
+        return Response({'is_valid': bool(token_obj)})
+    except Token.DoesNotExist:
+        return Response({
+            'is_valid': False,
+            'error': 'Invalid token'
+        })
+
+
 
 
 def register(request):
@@ -89,7 +110,6 @@ def profile(request):
 def send_new_user_credentials(user, password: str):
     html_body = render_to_string('users/Email Account Credentials Template.html', {'user': user, 'password': password})
     plain_text_body = strip_tags(html_body)
-
 
     send_mail(
         subject='Adaski Account Credentials',
@@ -258,4 +278,3 @@ class CompanyDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Company deleted successfully.')
         return super().delete(request, *args, **kwargs)
-

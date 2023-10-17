@@ -8,12 +8,10 @@
                 <i class="material-icons">delete</i>
                 Delete
             </button>
-            <a class="plain-link" href="{% url 'manage_company_users' user.profile.company.id %}">
-                <button type="button">
+            <button type="button" onclick="history.back()">
                     <i class="material-icons">cancel</i>
                     Cancel
                 </button>
-            </a>
         </span>
     </form>
 {% endblock %}
