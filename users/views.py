@@ -142,6 +142,9 @@ def create_new_users(request):
 
                 profile_form.save()
 
+                # set get_backup_emails to true
+                created_user.profile.get_backup_emails = True
+
                 # save the company selected in the profile form to the user's profile separately
                 created_user.profile.company = company
                 created_user.profile.save()
