@@ -3,11 +3,12 @@ import os.path
 from django.utils import timezone
 from SoftriteAPI.settings import EMAIL_HOST_USER
 from .forms import *
+from .serializers import *
 from backups.utils import *
 from urllib.parse import unquote
 from django.contrib import messages
 from django.db import IntegrityError
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
@@ -17,6 +18,9 @@ from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+
 
 HTTP_STATUS_METHOD_NOT_ALLOWED = 405
 HTTP_STATUS_UNAUTHORIZED = 401
@@ -174,7 +178,7 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
 @permission_classes([IsAuthenticated])
 def upload(request):
     """
-    Handle the chunked upload process for chunked file uploads.
+    Handle the upload process for chunked file uploads.
     """
     if not request.method == 'POST':
         return HttpResponse("Only POST requests are allowed", status=HTTP_STATUS_METHOD_NOT_ALLOWED)
@@ -291,6 +295,48 @@ def file_browser_view(request):
     }
 
     return render(request, "backups/file_browser.html", context)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_backups_list(request):
+    """
+    API endpoint that returns a list of backups from the user or the user's company if the user is a company admin.
+    """
+    user = request.user
+    company = user.profile.company
+
+    if user.profile.is_company_admin:
+        backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
+    else:
+        backups = Backup.objects.filter(user=user, company=company).order_by('-date_uploaded')
+
+    serializer = BackupSerializer(backups, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_backup(request, backup_id):
+    """
+    API endpoint that downloads the backup file based on a backup id.
+    """
+    # return a download of the backup file
+    backup = get_object_or_404(Backup, id=backup_id)
+
+    if (
+            (backup.user != request.user and request.user.profile.is_company_admin) and
+            not (request.user.is_superuser or request.user.is_staff)
+    ):
+        return HttpResponse("You don't have permission to download this backup.", status=HTTP_STATUS_UNAUTHORIZED)
+
+    if not os.path.isfile(backup.file.path):
+        return HttpResponse("Backup file not found.", status=HTTP_STATUS_SERVER_ERROR)
+
+    response = FileResponse(open(backup.file.path, 'rb'), as_attachment=True)
+    # response['Content-Disposition'] = f'attachment; filename="{backup.basename}"'
+    return response
+
 
 
 class BackupDeleteView(LoginRequiredMixin, DeleteView):

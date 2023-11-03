@@ -1,7 +1,4 @@
 import logging
-
-from rest_framework.permissions import IsAuthenticated
-
 from .forms import *
 from SoftriteAPI.settings import EMAIL_HOST_USER
 from backups.models import Backup
@@ -10,7 +7,7 @@ from django.urls import reverse
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.template.loader import render_to_string
 from django.shortcuts import render, redirect
@@ -32,8 +29,6 @@ def check_auth_token(request, token):
             'is_valid': False,
             'error': 'Invalid token'
         })
-
-
 
 
 def register(request):
