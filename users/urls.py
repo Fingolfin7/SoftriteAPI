@@ -9,7 +9,7 @@ from .forms import UserLoginForm
 urlpatterns = [
     path('', views.profile, name='profile'),
     path('get-auth-token/', obtain_auth_token, name='get-auth-token'),
-    path('check-auth-token/<token>', views.check_auth_token, name='check-auth-token'),
+    path('check-auth-token/<token>/', views.check_auth_token, name='check-auth-token'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html',
                                                 authentication_form=UserLoginForm), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
@@ -40,5 +40,5 @@ urlpatterns = [
     path('update_company/<int:pk>/', views.CompanyUpdateView.as_view(), name='update_company'),
     path('delete_company/<int:pk>/', views.CompanyDeleteView.as_view(), name='delete_company'),
     path('manage_companies/', views.CompanyListView.as_view(), name='manage_companies'),
-    path('manage_company_users/<int:pk>', views.CompanyUserListView.as_view(), name='manage_company_users'),
+    path('manage_company_users/<int:pk>/', views.CompanyUserListView.as_view(), name='manage_company_users'),
 ]

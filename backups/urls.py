@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('upload', views.upload, name='upload'),
     path('get_backups_list/', views.get_backups_list, name='get_backups_list'),
+    path('get_backups_list/<str:company_code>/', views.get_backups_list, name='get_backups_list'),
     path('download_backup/<int:backup_id>/', views.download_backup, name='download_backup'),
     path('manual_upload', views.manual_upload, name='manual_upload'),
     path('delete/<int:pk>', views.BackupDeleteView.as_view(), name='delete'),

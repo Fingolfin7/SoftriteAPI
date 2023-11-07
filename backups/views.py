@@ -299,7 +299,7 @@ def file_browser_view(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_backups_list(request):
+def get_backups_list(request, **kwargs):
     """
     API endpoint that returns a list of backups from the user or the user's company if the user is a company admin.
     """
@@ -310,6 +310,11 @@ def get_backups_list(request):
         backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
     else:
         backups = Backup.objects.filter(user=user, company=company).order_by('-date_uploaded')
+
+    if 'company_code' in kwargs:
+        company_code = kwargs['company_code']
+        # get the records where the basename contains the company code (in lower case)
+        backups = [backup for backup in backups if company_code.lower() in backup.basename.lower()]
 
     serializer = BackupSerializer(backups, many=True)
     return Response(serializer.data)
