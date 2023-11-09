@@ -1,3 +1,4 @@
+import json
 import uuid
 import os.path
 from django.utils import timezone
@@ -247,7 +248,7 @@ def file_browser_view(request):
     else:
         company = request.user.profile.company
         base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)  # media_root/backups/company_name/
-        backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
+        backups = Backup.objects.filter(company=company, file__path__startswith=base_path).order_by('-date_uploaded')
 
     # if this is the root folder then go ahead and run remove_empty_folders() to remove any empty subdirectories
     # before the user sees them
@@ -295,6 +296,84 @@ def file_browser_view(request):
     }
 
     return render(request, "backups/file_browser.html", context)
+
+
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
+def get_directory(request):
+    """
+    Endpoint for navigating a directory and its subdirectories.
+    Allows Adaski to navigate the cloud backup directory tree.
+    """
+    user = request.user
+    company = request.user.profile.company
+    base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)
+
+    if user.profile.is_company_admin:
+        backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
+    else:
+        backups = Backup.objects.filter(user=user, company=company).order_by('-date_uploaded')
+
+    if 'company_code' in request.POST:
+        company_code = request.POST.get('company_code', '')
+        base_path = os.path.join(base_path, company_code)
+        backups = [backup for backup in backups if company_code.lower() in backup.basename.lower()]
+    else:
+        # return an empty list if the company code is not provided
+        return Response({
+            # 'location': '',
+            # 'parent': '',
+            'directories': [],
+            'segments': [],
+            'files': [],
+        })
+
+    path = request.POST.get('path', '')
+    path = os.path.normpath(os.path.join(base_path, path))
+
+    if request.POST.get('default_latest'):
+        # set the path to the path of the latest backup file
+        print(path)
+        new_path = os.path.dirname(backups[0].file.path)
+
+        if new_path.find(path) > -1:
+            path = new_path
+        print(path)
+
+    subdirectories = []
+    files = []
+
+
+    if os.path.isdir(os.path.normpath(path)):
+        items = os.listdir(path)
+        subdirectories = [item for item in items if os.path.isdir(os.path.join(path, item))]
+        files = [backup for backup in backups if backup.file.path in
+                 [os.path.join(path, item) for item in items]
+                 ]  # backups in the current directory
+
+    path_segments = [segment for segment in path.replace(os.path.join(MEDIA_ROOT, 'backups', company.name), '').split(os.sep) if segment]
+
+    # one_level_up = os.path.normpath(f"{os.sep}".join(path_segments[1:])) if len(path_segments) > 1 else ''
+
+    serializer = BackupSerializer(files, many=True)
+
+    json_format = json.dumps(
+        {
+            'directories': subdirectories,
+            'segments': path_segments,
+            'files': serializer.data,
+        },
+        indent=4)
+
+    print(json_format)
+
+    return Response({
+        # 'location': path.replace(base_path, ''),
+        # 'parent': one_level_up.replace(base_path, ''),
+        'directories': subdirectories,
+        'segments': path_segments,
+        'files': serializer.data,
+    })
 
 
 @api_view(['GET'])
