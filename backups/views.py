@@ -333,12 +333,10 @@ def get_directory(request):
 
     if request.POST.get('default_latest'):
         # set the path to the path of the latest backup file
-        print(path)
         new_path = os.path.dirname(backups[0].file.path)
 
         if new_path.find(path) > -1:
             path = new_path
-        print(path)
 
     subdirectories = []
     files = []
@@ -356,16 +354,6 @@ def get_directory(request):
     # one_level_up = os.path.normpath(f"{os.sep}".join(path_segments[1:])) if len(path_segments) > 1 else ''
 
     serializer = BackupSerializer(files, many=True)
-
-    json_format = json.dumps(
-        {
-            'directories': subdirectories,
-            'segments': path_segments,
-            'files': serializer.data,
-        },
-        indent=4)
-
-    print(json_format)
 
     return Response({
         # 'location': path.replace(base_path, ''),
