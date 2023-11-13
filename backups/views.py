@@ -248,7 +248,7 @@ def file_browser_view(request):
     else:
         company = request.user.profile.company
         base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)  # media_root/backups/company_name/
-        backups = Backup.objects.filter(company=company, file__path__startswith=base_path).order_by('-date_uploaded')
+        backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
 
     # if this is the root folder then go ahead and run remove_empty_folders() to remove any empty subdirectories
     # before the user sees them
@@ -298,7 +298,7 @@ def file_browser_view(request):
     return render(request, "backups/file_browser.html", context)
 
 
-@api_view(['POST', 'GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def get_directory(request):
     """
@@ -341,13 +341,12 @@ def get_directory(request):
     subdirectories = []
     files = []
 
-
     if os.path.isdir(os.path.normpath(path)):
         items = os.listdir(path)
         subdirectories = [item for item in items if os.path.isdir(os.path.join(path, item))]
         files = [backup for backup in backups if backup.file.path in
                  [os.path.join(path, item) for item in items]
-                 ]  # backups in the current directory
+                ]  # backups in the current directory
 
     path_segments = [segment for segment in path.replace(os.path.join(MEDIA_ROOT, 'backups', company.name), '').split(os.sep) if segment]
 
