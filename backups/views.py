@@ -281,7 +281,11 @@ def file_browser_view(request):
         segment_path = os.path.normpath(f"{os.sep}".join(path_segments[:i + 1]))
         clickable_path_segments.append((segment, segment_path))
 
-    clickable_path_segments = [seg_tuple for seg_tuple in clickable_path_segments if seg_tuple[0] not in MEDIA_ROOT]
+    # Ensure that clickable_path_segments includes only paths starting directly after MEDIA_ROOT.
+    # Using 'if not MEDIA_ROOT.startswith(seg_tuple[1])' instead of 'if MEDIA_ROOT.startswith(seg_tuple[1])'
+    # ensures that the path segments are not clickable if they are outside the MEDIA_ROOT folder.
+    clickable_path_segments = [seg_tuple for seg_tuple in clickable_path_segments if
+                               not MEDIA_ROOT.startswith(seg_tuple[1])]
 
     if not (request.user.is_staff or request.user.is_superuser):  # if the user is not a staff member or superuser
         clickable_path_segments = clickable_path_segments[1:]  # remove the 'backups' folder from the clickable path
