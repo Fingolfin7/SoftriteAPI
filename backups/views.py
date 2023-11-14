@@ -304,7 +304,7 @@ def file_browser_view(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def get_directory(request):
+def get_directories(request):
     """
     Endpoint for navigating a directory and its subdirectories.
     Allows Adaski to navigate the cloud backup directory tree.
@@ -322,11 +322,15 @@ def get_directory(request):
         company_code = request.POST.get('company_code', '')
         base_path = os.path.join(base_path, company_code)
         backups = [backup for backup in backups if company_code.lower() in backup.basename.lower()]
-    else:
-        # return an empty list if the company code is not provided
+    else:  # return an empty list if the company code is not provided
         return Response({
-            # 'location': '',
-            # 'parent': '',
+            'directories': [],
+            'segments': [],
+            'files': [],
+        })
+
+    if len(backups) < 1:  # if there are no backups, return an empty response
+        return Response({
             'directories': [],
             'segments': [],
             'files': [],
@@ -336,10 +340,8 @@ def get_directory(request):
     path = os.path.normpath(os.path.join(base_path, path))
 
     if request.POST.get('default_latest'):
-        # set the path to the path of the latest backup file
-        new_path = os.path.dirname(backups[0].file.path)
-
-        if new_path.find(path) > -1:
+        new_path = os.path.dirname(backups[0].file.path)  # set the path to the path of the latest backup file
+        if new_path.find(path) > -1:  # if the new path is a subdirectory of the current path
             path = new_path
 
     subdirectories = []
@@ -359,7 +361,6 @@ def get_directory(request):
     serializer = BackupSerializer(files, many=True)
 
     return Response({
-        # 'location': path.replace(base_path, ''),
         # 'parent': one_level_up.replace(base_path, ''),
         'directories': subdirectories,
         'segments': path_segments,
