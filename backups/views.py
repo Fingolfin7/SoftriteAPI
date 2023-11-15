@@ -313,10 +313,12 @@ def get_directories(request):
     company = request.user.profile.company
     base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)
 
-    if user.profile.is_company_admin:
-        backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
-    else:
-        backups = Backup.objects.filter(user=user, company=company).order_by('-date_uploaded')
+    # if user.profile.is_company_admin:
+    #     backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
+    # else:
+    #     backups = Backup.objects.filter(user=user, company=company).order_by('-date_uploaded')
+
+    backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
 
     if 'company_code' in request.POST:
         company_code = request.POST.get('company_code', '')
