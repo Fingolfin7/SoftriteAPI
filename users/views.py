@@ -49,12 +49,18 @@ def register(request):
 class delete_user(LoginRequiredMixin, DeleteView):
     model = User
     template_name = 'users/user_confirm_delete.html'
-    success_url = 'profile'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Delete User'
         return context
+
+    def get_success_url(self):
+        # return reverse('manage_company_users')
+        # return to user screen and show a success message
+        messages.success(self.request, 'User deleted successfully.')
+        return reverse('manage_company_users', kwargs={'pk': self.object.profile.company.pk})
+
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'User deleted successfully.')
