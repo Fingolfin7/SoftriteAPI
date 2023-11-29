@@ -22,7 +22,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 
-
 HTTP_STATUS_METHOD_NOT_ALLOWED = 405
 HTTP_STATUS_UNAUTHORIZED = 401
 HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415
@@ -309,14 +308,8 @@ def get_directories(request):
     Endpoint for navigating a directory and its subdirectories.
     Allows Adaski to navigate the cloud backup directory tree.
     """
-    user = request.user
     company = request.user.profile.company
     base_path = os.path.join(MEDIA_ROOT, 'backups', company.name)
-
-    # if user.profile.is_company_admin:
-    #     backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
-    # else:
-    #     backups = Backup.objects.filter(user=user, company=company).order_by('-date_uploaded')
 
     backups = Backup.objects.filter(company=company).order_by('-date_uploaded')
 
@@ -358,12 +351,9 @@ def get_directories(request):
 
     path_segments = [segment for segment in path.replace(os.path.join(MEDIA_ROOT, 'backups', company.name), '').split(os.sep) if segment]
 
-    # one_level_up = os.path.normpath(f"{os.sep}".join(path_segments[1:])) if len(path_segments) > 1 else ''
-
     serializer = BackupSerializer(files, many=True)
 
     return Response({
-        # 'parent': one_level_up.replace(base_path, ''),
         'directories': subdirectories,
         'segments': path_segments,
         'files': serializer.data,
@@ -416,18 +406,11 @@ def download_backup(request, backup_id):
     return response
 
 
-
 class BackupDeleteView(LoginRequiredMixin, DeleteView):
     model = Backup
     success_url = reverse_lazy('profile')
     context_object_name = 'backup'
     template_name = 'backups/backups_delete.html'
-
-    def get_object(self, queryset=None):
-        backup = super().get_object()
-        # if backup.user != self.request.user and not backup.user.is_superuser:
-        #     raise PermissionError("You don't have permission to delete this backup.")
-        return backup
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

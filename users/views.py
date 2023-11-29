@@ -23,7 +23,12 @@ def check_auth_token(request, token):
     try:
         # Retrieve the token object from the database
         token_obj = Token.objects.get(key=token)
-        return Response({'is_valid': bool(token_obj)})
+        return Response({
+            'is_valid': bool(token_obj),
+            'username': token_obj.user.username,
+            'email': token_obj.user.email,
+            'company': token_obj.user.profile.company.name,
+        })
     except Token.DoesNotExist:
         return Response({
             'is_valid': False,
