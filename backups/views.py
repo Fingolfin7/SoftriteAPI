@@ -21,7 +21,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-
 HTTP_STATUS_METHOD_NOT_ALLOWED = 405
 HTTP_STATUS_UNAUTHORIZED = 401
 HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415
@@ -55,14 +54,17 @@ def process_final_file_path(user, request):
     adaski_file_path = request.POST.get('save_dir')
 
     if adaski_file_path:
-        adaski_file_path = os.path.normpath(adaski_file_path)
-        adaski_file_path = os.path.dirname(adaski_file_path) if os.path.isfile(adaski_file_path) else adaski_file_path
-        adaski_file_path, before_after_gen_folder = os.path.split(adaski_file_path)
-        adaski_file_path, month_folder = os.path.split(adaski_file_path)
-        adaski_file_path, year_folder = os.path.split(adaski_file_path)
-        _, company_code_folder = os.path.split(adaski_file_path)
+        parts = adaski_file_path.split('files')
 
-        saveDir = os.path.join(saveDir, company_code_folder, year_folder, month_folder, before_after_gen_folder)
+        if len(parts) < 2:
+            return HttpResponse("Invalid file path", status=HTTP_STATUS_BAD_REQUEST)
+
+        adaski_file_path = parts[1]
+
+        if adaski_file_path.startswith('/') or adaski_file_path.startswith(os.sep):
+            adaski_file_path = adaski_file_path[1:]
+
+        saveDir = os.path.join(saveDir, adaski_file_path)
 
     filename = request.POST.get('filename')
     final_filename = f"{filename}"
@@ -347,9 +349,10 @@ def get_directories(request):
         subdirectories = [item for item in items if os.path.isdir(os.path.join(path, item))]
         files = [backup for backup in backups if backup.file.path in
                  [os.path.join(path, item) for item in items]
-                ]  # backups in the current directory
+                 ]  # backups in the current directory
 
-    path_segments = [segment for segment in path.replace(os.path.join(MEDIA_ROOT, 'backups', company.name), '').split(os.sep) if segment]
+    path_segments = [segment for segment in
+                     path.replace(os.path.join(MEDIA_ROOT, 'backups', company.name), '').split(os.sep) if segment]
 
     serializer = BackupSerializer(files, many=True)
 
