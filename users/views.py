@@ -176,6 +176,8 @@ class CompanyUserListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'users/user_list.html'
     context_object_name = 'users'
+    ordering = ['username']
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -207,6 +209,8 @@ class CompanyListView(LoginRequiredMixin, ListView):
     model = Company
     template_name = 'users/company_list.html'
     context_object_name = 'companies'
+    ordering = ['id']
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
