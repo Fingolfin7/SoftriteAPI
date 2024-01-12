@@ -13,10 +13,17 @@ def convert_size(size_bytes: int | bytes) -> str:
     """
     if size_bytes == 0:
         return '0 bytes'
-    for unit in ['bytes', 'KB', 'MB', 'GB', 'TB']:
-        if size_bytes < 1024:
-            return f'{size_bytes:.2f} {unit}'
-        size_bytes /= 1024
+
+    units = ['bytes', 'KB', 'MB', 'GB', 'TB']
+
+    # keep the exponent within the range of the units list (len(units) - 1)
+    exponent = min(math.floor(math.log(size_bytes, 1024)), len(units) - 1)
+
+    unit = units[exponent]
+
+    size = size_bytes / pow(1024, exponent)
+
+    return f"{size:.2f} {unit}"
 
 
 def calculate_checksum(filepath: str) -> str:
