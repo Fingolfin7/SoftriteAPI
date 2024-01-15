@@ -31,6 +31,13 @@
                     eye.show();
                 });
 
+                // Hide the eye icon when the password field is blurred
+                password.blur(function() {
+                    setTimeout(function() {
+                        eye.hide();
+                    }, 200);
+                });
+
                 eye.click(function() {
                     let type = password.attr('type');
 
