@@ -58,7 +58,7 @@ class UserLoginForm(AuthenticationForm):
     username = UsernameField(widget=forms.TextInput(attrs={'placeholder': 'Username or Email', 'class': 'width-100'}),
                              label="")
     password = forms.CharField(widget=forms.PasswordInput(
-        attrs={'placeholder': 'Enter Password', 'autocomplete': 'on', 'class': 'width-100', 'render_value': 'True'}),
+        attrs={'placeholder': 'Enter Password', 'autocomplete': 'on', 'class': 'width-100', 'id': 'password'}),
         label="")
 
 

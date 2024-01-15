@@ -14,6 +14,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.views import LoginView
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,17 +74,17 @@ class delete_user(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-def login(request):
-    if request == "POST":
-        form = UserLoginForm(request.POST)
-        if form.is_valid():
-            messages.success(request, 'Login successful.')
-            return redirect('profile')
-        else:
-            messages.error(request, 'Error logging in. Please try again.')
-    else:
-        form = UserLoginForm()
-    return render(request, 'users/login.html', {'form': form, 'title': 'Login'})
+class CustomLoginView(LoginView):
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        messages.error(self.request, 'Invalid username or password.')
+        return response
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Login successful.')
+        return response
+
 
 
 @login_required
