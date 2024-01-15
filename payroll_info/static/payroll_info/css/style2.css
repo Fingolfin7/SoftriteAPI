@@ -375,6 +375,25 @@ input[type='submit'].plain-button:hover {
   background: none;
 }
 
+/* password toggle icon */
+.password-toggle-icon {
+  position: absolute;
+  right: 5%;
+  cursor: pointer;
+}
+
+.password-toggle-icon i {
+  font-size: 1.5rem;
+  color: #333;
+  transition: color 0.3s ease-in-out;
+  /*margin-bottom: 20px;*/
+}
+
+.password-toggle-icon i:hover {
+  color: var(--button-hover-color);
+}
+
+
 /*icons*/
 
 .material-icons{

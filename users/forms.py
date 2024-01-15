@@ -55,10 +55,10 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class UserLoginForm(AuthenticationForm):
-    username = UsernameField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'width-100'}),
+    username = UsernameField(widget=forms.TextInput(attrs={'placeholder': 'Username or Email', 'class': 'width-100'}),
                              label="")
     password = forms.CharField(widget=forms.PasswordInput(
-        attrs={'placeholder': 'Enter Password', 'autocomplete': 'on', 'class': 'width-100'}),
+        attrs={'placeholder': 'Enter Password', 'autocomplete': 'on', 'class': 'width-100', 'render_value': 'True'}),
         label="")
 
 

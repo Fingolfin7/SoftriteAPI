@@ -1,13 +1,49 @@
 {% extends 'users/base.html'%}
 {% load crispy_forms_filters %}
 {% load crispy_forms_tags %}
+{% load static %}
+
 {% block content %}
    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
        <div class="image image4"></div>
        <span class="section-header">login</span>
 
-       {{ form|crispy }}
+       <div class="flex-row">
+           <input type="text" name="username" placeholder="Username" class="width-100 form-control" required autofocus/>
+       </div>
+
+         <div class="flex-row">
+             <input type="password" name="password" id="password" placeholder="Enter Password" class="width-100 form-control" required/>
+             <span class="password-toggle-icon"><i class="material-icons" id="eye-icon">visibility</i></span>
+         </div>
+
+       <script>
+            $(document).ready(function() {
+                const eye = $("#eye-icon");
+                const password = $("#password");
+
+                // Initially hide the eye icon
+                eye.hide();
+
+                // Show the eye icon when the password field is focused
+                password.focus(function() {
+                    eye.show();
+                });
+
+                eye.click(function() {
+                    let type = password.attr('type');
+
+                    if (type === 'password') {
+                        password.attr('type', 'text');
+                        $(this).text('visibility_off');
+                    } else {
+                        password.attr('type', 'password');
+                        $(this).text('visibility');
+                    }
+                });
+            });
+       </script>
 
         <div class="flex-row">
             <input type="submit" class="button" id="login" value="login">
