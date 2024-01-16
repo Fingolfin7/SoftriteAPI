@@ -107,7 +107,6 @@ function drawChart(start_, end_, baseUrl) {
                 ajax_data.push(data[i].rate);
                 ajax_labels.push(data[i].date);
             }
-            console.log(ajax_data, ajax_labels);
 
             let myChart = new Chart(ctx, {
                 type: 'line',
@@ -127,7 +126,6 @@ function drawChart(start_, end_, baseUrl) {
                     }]
                 },
                 options: {
-                    responsive: true,
                     scales: {
                         x: {
                             type: 'time',
