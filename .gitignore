@@ -147,3 +147,4 @@ cython_debug/
 *.sqlite3
 /media/
 /Logs/
+/.vscode
