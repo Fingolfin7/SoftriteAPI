@@ -1,4 +1,6 @@
 {% extends 'payroll_info/base.html' %}
+{% load static %}
+
 {% block content %}
     <div id="home_page">
         {% csrf_token %}
@@ -8,6 +10,7 @@
             <span class="section-header">
                 Interbank Exchange Rate
             </span>
+
             <span class="flex-row">
                 <label><b>Rate: </b></label>
                 {{ interbank_rate.rate|floatformat:2 }}
@@ -24,6 +27,55 @@
                 </a>
             </span>
             <br>
+             <!-- chart showing a line graph of the interbank rate for the last week by default,
+            but users can select a month, quarter, year or custom range option -->
+            <div id="show_graph">
+
+                <input type="hidden" id="baseUrl" value="{% url 'get_rates_between' 'start_date' 'end_date' %}">
+
+                <!-- display the graph using chart js -->
+                <div id="canvas_container">
+                    <canvas id="graph" width="400" height="200"></canvas>
+                </div>
+
+                <div id="options">
+                    <span id="predefined" class=" width-90 flex-row">
+                        <b>Range:</b>
+                        <button id="month" class="plain-button"><em>Month</em></button>
+                        <button id="quarter" class="plain-button"><em>Quarter</em></button>
+                        <button id="year" class="plain-button"><em>Year</em></button>
+                        <button id="custom" class="plain-button"><em>Custom</em></button>
+                    </span>
+                    <div id="custom_range" style="display: none;">
+                        <span class="flex-row">
+                            <label for="start_date">Start Date: </label>
+                            <input type="date" name="start_date" id="start_date">
+                        </span>
+
+                        <br>
+
+                        <span class="flex-row">
+                            <label for="end_date">End Date: </label>
+                            <input type="date" name="end_date" id="end_date">
+                        </span>
+
+                        <br>
+                        <button id="show">Show</button>
+                    </div>
+                </div>
+
+                <!-- load in the chart script after the canvas has been created -->
+                <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"> </script>
+                <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!--chart js-->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+                <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
+                <script src="{% static 'payroll_info/js/chart.js' %}" type="text/javascript"></script>
+
+            </div>
+
         </section>
 
         <span class="button-row">

@@ -75,7 +75,7 @@ def get_rates_between(request, start_date, end_date):
         rates = InterbankUSDRate.objects.filter(date__range=[start_date, end_date]).order_by('date')
         serializer = InterbankUSDRateSerializer(rates, many=True)
         if not rates:
-            return HttpResponseNotFound("No rates found")
+            return Response({})
         return Response(serializer.data)
     except ValueError:
         return HttpResponseNotFound("Invalid date format")
