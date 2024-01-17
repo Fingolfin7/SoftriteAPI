@@ -1,8 +1,6 @@
 $(document).ready(function() {
-
     let baseUrl = $('#baseUrl').val();
     let canvasContainer = $('#canvas_container');
-    console.log(baseUrl);
 
     // by default the graph shows the last week's data, so start date is 7 days ago and end date is today
     let start_date = new Date();
@@ -12,7 +10,6 @@ $(document).ready(function() {
     end_date.setDate(end_date.getDate());
 
     drawChart(formatDate(start_date), formatDate(end_date), baseUrl);
-
 
     $('#month').click(function() {
         // if the month button is clicked, the start date is 30 days ago and the end date is today
@@ -24,8 +21,6 @@ $(document).ready(function() {
         canvasContainer.empty();
         canvasContainer.append("<canvas id='graph' width='400' height='200'></canvas>");
         drawChart(formatDate(start_date), formatDate(end_date), baseUrl);
-
-
     });
 
     $('#quarter').click(function() {
@@ -65,14 +60,18 @@ $(document).ready(function() {
         start_date = new Date($('#start_date').val());
         end_date = new Date($('#end_date').val());
 
-        canvasContainer.empty();
-        canvasContainer.append("<canvas id='graph' width='400' height='200'></canvas>");
-        drawChart(formatDate(start_date), formatDate(end_date), baseUrl);
+        if((start_date && end_date) && (start_date < end_date)) {
+            canvasContainer.empty();
+            canvasContainer.append("<canvas id='graph' width='400' height='200'></canvas>");
+            drawChart(formatDate(start_date), formatDate(end_date), baseUrl);
 
-        $('#custom_range').hide();
-        $('#predefined').show();
+            $('#custom_range').hide();
+            $('#predefined').show();
+        }
+        else {
+            alert('Invalid Date Range');
+        }
     });
-
 });
 
 function formatDate(date) {
@@ -91,7 +90,6 @@ function formatDate(date) {
 
 function drawChart(start_, end_, baseUrl) {
     const ctx = $('#graph');
-
 
     let ajax_data = [];
     let ajax_labels = [];
@@ -117,10 +115,10 @@ function drawChart(start_, end_, baseUrl) {
                         data: ajax_data,
                         fill: false,
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(99,115,255, 0.2)',
                         ],
                         borderColor: [
-                            'rgba(255, 99, 132, 1)',
+                            'rgb(99,115,255)',
                         ],
                         borderWidth: 1
                     }]
