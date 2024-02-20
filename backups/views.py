@@ -1,7 +1,5 @@
-import json
 import uuid
 import os.path
-from django.utils import timezone
 from SoftriteAPI.settings import EMAIL_HOST_USER
 from .forms import *
 from .serializers import *
@@ -139,16 +137,17 @@ def handle_uploaded_file(request, uploader_id, total_chunks, user):
     # Verify checksum if provided
     checksum = request.POST.get('checksum')
     calculated_checksum = calculate_checksum(final_file_path)
+
     if checksum and checksum != calculated_checksum:
         backup.delete()  # Deletes the backup  AND  the backup file if the checksums don't match
         return HttpResponse("Invalid checksum", status=HTTP_STATUS_BAD_REQUEST)
 
-    if int(backup.filesize) > storage_left:
+    if backup.filesize > storage_left:
         response_str = f"Could not upload file {backup.basename}. " \
                        f"You cannot exceed your storage limit of " \
                        f"{convert_size(user.profile.company.max_storage)}. " \
                        f"Storage left: {convert_size(storage_left)}, " \
-                       f"upload size: {convert_size(int(backup.filesize))}"
+                       f"upload size: {convert_size(backup.filesize)}"
         backup.delete()
         delete_chunks(uploader_id)
         return HttpResponse(response_str, status=HTTP_STATUS_REQUEST_ENTITY_TOO_LARGE)
@@ -405,7 +404,6 @@ def download_backup(request, backup_id):
         return HttpResponse("Backup file not found.", status=HTTP_STATUS_SERVER_ERROR)
 
     response = FileResponse(open(backup.file.path, 'rb'), as_attachment=True)
-    # response['Content-Disposition'] = f'attachment; filename="{backup.basename}"'
     return response
 
 

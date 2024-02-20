@@ -90,6 +90,7 @@ function formatDate(date) {
 
 function drawChart(start_, end_, baseUrl) {
     const ctx = $('#graph');
+    const avg_rate_for_period = $('#average_rate_value');
 
     let ajax_data = [];
     let ajax_labels = [];
@@ -105,6 +106,14 @@ function drawChart(start_, end_, baseUrl) {
                 ajax_data.push(data[i].rate);
                 ajax_labels.push(data[i].date);
             }
+
+            // calculate the average rate for the period
+            let sum = 0;
+            for (let i = 0; i < ajax_data.length; i++) {
+                sum += ajax_data[i];
+            }
+            let average = sum / ajax_data.length;
+            avg_rate_for_period.text(average.toFixed(2));
 
             let myChart = new Chart(ctx, {
                 type: 'line',

@@ -84,4 +84,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.created.strftime('%m-%d-%Y at %H:%M')}"
-
