@@ -52,15 +52,16 @@ def process_final_file_path(user, request):
     adaski_file_path = request.POST.get('save_dir')
 
     if adaski_file_path:
-        parts = adaski_file_path.split('files')
+        if adaski_file_path != 'Manual Uploads':
+            parts = adaski_file_path.split('files')
 
-        if len(parts) < 2:
-            return HttpResponse("Invalid file path", status=HTTP_STATUS_BAD_REQUEST)
+            if len(parts) < 2:
+                return HttpResponse("Invalid file path", status=HTTP_STATUS_BAD_REQUEST)
 
-        adaski_file_path = parts[1]
+            adaski_file_path = parts[1]
 
-        if adaski_file_path.startswith('/') or adaski_file_path.startswith(os.sep):
-            adaski_file_path = adaski_file_path[1:]
+            if adaski_file_path.startswith('/') or adaski_file_path.startswith(os.sep):
+                adaski_file_path = adaski_file_path[1:]
 
         saveDir = os.path.join(saveDir, adaski_file_path)
 
